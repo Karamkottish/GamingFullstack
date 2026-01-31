@@ -35,8 +35,8 @@ export function Navbar() {
 
                 <div className="hidden md:flex items-center gap-4">
                     <ThemeToggle />
-                    <Button variant="ghost" size="sm">Log in</Button>
-                    <Button variant="glow" size="sm">Get Started</Button>
+                    <Link href="/auth/login"><Button variant="ghost" size="sm">Log in</Button></Link>
+                    <Link href="/auth/register"><Button variant="glow" size="sm">Get Started</Button></Link>
                 </div>
 
                 <div className="flex items-center gap-2 md:hidden">
@@ -58,8 +58,8 @@ export function Navbar() {
                         <div className="flex flex-col p-4 gap-4">
                             <Link href="#features" className="text-sm font-medium p-2 hover:bg-white/5 rounded-md">Features</Link>
                             <Link href="#solutions" className="text-sm font-medium p-2 hover:bg-white/5 rounded-md">Solutions</Link>
-                            <Button variant="ghost" className="w-full justify-start">Log in</Button>
-                            <Button variant="glow" className="w-full">Get Started</Button>
+                            <Link href="/auth/login"><Button variant="ghost" className="w-full justify-start">Log in</Button></Link>
+                            <Link href="/auth/register"><Button variant="glow" className="w-full">Get Started</Button></Link>
                         </div>
                     </motion.div>
                 )}
