@@ -1,8 +1,11 @@
 "use client"
-import { Search, MoreVertical, Ban, CheckCircle } from "lucide-react"
+import { useState } from "react"
+import { Search, MoreVertical, Ban, CheckCircle, Plus } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Card } from "@/components/ui/Card"
+import { Modal } from "@/components/ui/Modal"
+import { toast } from "sonner"
 
 // Dummy Data for Backend Reference
 const USERS_DATA = [
@@ -14,6 +17,19 @@ const USERS_DATA = [
 ]
 
 export default function AgentUsersPage() {
+    const [isAddUserOpen, setIsAddUserOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleAddUser = (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsLoading(true)
+        setTimeout(() => {
+            setIsLoading(false)
+            setIsAddUserOpen(false)
+            toast.success("User added successfully!")
+        }, 1000)
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -21,10 +37,33 @@ export default function AgentUsersPage() {
                     <h1 className="text-3xl font-bold tracking-tight text-white">User Management</h1>
                     <p className="text-muted-foreground">Manage players registered under your agency.</p>
                 </div>
-                <Button variant="glow">
+                <Button variant="glow" onClick={() => setIsAddUserOpen(true)}>
                     + Add New User
                 </Button>
             </div>
+
+            {/* Add User Modal */}
+            <Modal isOpen={isAddUserOpen} onClose={() => setIsAddUserOpen(false)} title="Register New Player">
+                <form onSubmit={handleAddUser} className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase">Username</label>
+                        <Input placeholder="e.g. gamer123" required className="bg-black/20" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase">Email</label>
+                        <Input type="email" placeholder="player@email.com" required className="bg-black/20" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase">Initial Credit Limit</label>
+                        <Input type="number" placeholder="0.00" className="bg-black/20" />
+                    </div>
+                    <div className="pt-2">
+                        <Button type="submit" variant="glow" className="w-full" isLoading={isLoading}>
+                            Create Account
+                        </Button>
+                    </div>
+                </form>
+            </Modal>
 
             <Card className="bg-black/40 border-white/10 backdrop-blur-sm p-6">
                 {/* Filters */}
@@ -68,8 +107,8 @@ export default function AgentUsersPage() {
                                     </td>
                                     <td className="px-4 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${user.status === 'ACTIVE'
-                                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
                                             }`}>
                                             {user.status === 'ACTIVE' ? <CheckCircle className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
                                             {user.status}

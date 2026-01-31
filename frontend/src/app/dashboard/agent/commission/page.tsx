@@ -1,7 +1,11 @@
 "use client"
+import { useState } from "react"
 import { Download, Calendar, DollarSign, Filter } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
+import { Modal } from "@/components/ui/Modal"
+import { Input } from "@/components/ui/Input"
+import { toast } from "sonner"
 
 // Dummy Commission Data
 const COMMISSION_HISTORY = [
@@ -13,6 +17,18 @@ const COMMISSION_HISTORY = [
 ]
 
 export default function AgentCommissionPage() {
+    const [isPayoutOpen, setIsPayoutOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleRequestPayout = () => {
+        setIsLoading(true)
+        setTimeout(() => {
+            setIsLoading(false)
+            setIsPayoutOpen(false)
+            toast.success("Payout request submitted!")
+        }, 1500)
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -32,6 +48,30 @@ export default function AgentCommissionPage() {
                 </div>
             </div>
 
+            {/* Payout Modal */}
+            <Modal isOpen={isPayoutOpen} onClose={() => setIsPayoutOpen(false)} title="Request Payout">
+                <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-black/40 border border-white/10 text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Available to Withdraw</p>
+                        <h2 className="text-3xl font-bold text-green-400">$2,430.50</h2>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase">Amount</label>
+                        <Input defaultValue="2430.50" className="bg-black/20" />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-muted-foreground uppercase">Method</label>
+                        <select className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/50">
+                            <option>USDT (TRC20)</option>
+                            <option>Bank Transfer</option>
+                        </select>
+                    </div>
+                    <Button variant="glow" onClick={handleRequestPayout} isLoading={isLoading} className="w-full">
+                        Confirm Request
+                    </Button>
+                </div>
+            </Modal>
+
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="p-6 bg-gradient-to-br from-green-500/10 to-emerald-600/5 border-green-500/20">
@@ -44,7 +84,10 @@ export default function AgentCommissionPage() {
                             <DollarSign className="h-6 w-6" />
                         </div>
                     </div>
-                    <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white border-none shadow-lg shadow-green-900/20">
+                    <Button
+                        onClick={() => setIsPayoutOpen(true)}
+                        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white border-none shadow-lg shadow-green-900/20"
+                    >
                         Request Payout
                     </Button>
                 </Card>

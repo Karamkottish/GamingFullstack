@@ -1,5 +1,6 @@
 "use client"
 import { MousePointer2, UserPlus, DollarSign, Copy, Download, Link as LinkIcon, Image } from "lucide-react"
+import { UserGlobe } from "@/components/dashboard/UserGlobe"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -82,40 +83,46 @@ export default function AffiliateDashboard() {
                     </div>
                 </div>
 
-                {/* Quick Link Generator */}
+                {/* Right Column: Globe & Quick Link */}
                 <div className="space-y-6">
+                    {/* Live Traffic Globe (New) */}
+                    <div className="bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col h-[300px]">
+                        <div className="p-4 pb-0 z-10 flex justify-between items-center">
+                            <div>
+                                <h3 className="text-md font-semibold text-white">Live Traffic</h3>
+                                <p className="text-xs text-muted-foreground">Real-time clicks</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                <span className="text-[10px] font-mono text-green-500 font-bold">ONLINE</span>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full relative">
+                            <div className="absolute inset-0 scale-[1.5] translate-y-10">
+                                <UserGlobe />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Quick Link Generator */}
                     <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm space-y-4">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 rounded-lg bg-primary/10">
                                 <LinkIcon className="h-5 w-5 text-primary" />
                             </div>
-                            <h3 className="text-lg font-semibold text-white">Quick Link Generator</h3>
+                            <h3 className="text-lg font-semibold text-white">Quick Link</h3>
                         </div>
-                        <p className="text-sm text-muted-foreground">Create a tracking link for your next campaign.</p>
 
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-muted-foreground uppercase">Target Page</label>
+                            <label className="text-xs font-semibold text-muted-foreground uppercase">Target</label>
                             <Input placeholder="https://nexusplay.com/casino" className="bg-black/20" />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-muted-foreground uppercase">Campaign ID (Optional)</label>
-                            <Input placeholder="summer-promo-2027" className="bg-black/20" />
                         </div>
                         <Button variant="glow" className="w-full">
                             <Copy className="h-4 w-4 mr-2" />
-                            Generate & Copy Link
-                        </Button>
-                    </div>
-
-                    {/* Marketing Assets Mini */}
-                    <div className="bg-gradient-to-br from-violet-900/20 to-primary/10 border border-primary/20 rounded-2xl p-6 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Image className="h-24 w-24" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white mb-2">Marketing Assets</h3>
-                        <p className="text-sm text-muted-foreground mb-4 relative z-10">Access high-quality banners, logos, and landing page templates.</p>
-                        <Button variant="outline" size="sm" className="relative z-10 bg-black/50 hover:bg-black/70 border-primary/30">
-                            View Library
+                            Copy Link
                         </Button>
                     </div>
                 </div>
