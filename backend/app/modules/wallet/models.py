@@ -23,8 +23,8 @@ class Wallet(Base):
     is_frozen = Column(Boolean, default=False)
     
     # Relationships
-    # user = relationship("User", back_populates="wallet") 
-    # We will define relationships in a central registry or imported carefully to avoid cycles
+    user = relationship("User", back_populates="wallet")
+    transactions = relationship("Transaction", back_populates="wallet")
 
 class Transaction(Base):
     __tablename__ = "transactions"
@@ -35,3 +35,6 @@ class Transaction(Base):
     type = Column(SqlEnum(TransactionType), nullable=False)
     status = Column(String, default="PENDING") # PENDING, COMPLETED, FAILED
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    wallet = relationship("Wallet", back_populates="transactions")
