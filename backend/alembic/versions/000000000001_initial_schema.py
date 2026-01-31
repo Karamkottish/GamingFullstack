@@ -27,6 +27,7 @@ def upgrade():
         first_name VARCHAR, 
         last_name VARCHAR, 
         telegram_id VARCHAR, 
+        phone_number VARCHAR,
         agent_id UUID, 
         is_active BOOLEAN, 
         created_at TIMESTAMP WITHOUT TIME ZONE, 
@@ -37,12 +38,15 @@ def upgrade():
     """)
     op.execute("CREATE INDEX IF NOT EXISTS ix_users_email ON users (email)")
 
-    # Explicitly ADD agent_id if it's missing (Fix for the specific error)
+    # Explicitly ADD columns if they're missing (Fix for incremental updates)
     op.execute("""
     DO $$
     BEGIN
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='agent_id') THEN
             ALTER TABLE users ADD COLUMN agent_id UUID REFERENCES users(id);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='phone_number') THEN
+            ALTER TABLE users ADD COLUMN phone_number VARCHAR;
         END IF;
     END
     $$;
