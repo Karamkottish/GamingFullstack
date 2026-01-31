@@ -3,12 +3,10 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
 
-const inter = Inter({ subsets: ['latin'] })
+import { ThemeProvider } from "@/components/ui/ThemeProvider"
 
-export const metadata: Metadata = {
-  title: 'Gaming Platform',
-  description: 'Premium Online Gaming Agent & Affiliate System',
-}
+const inter = Inter({ subsets: ['latin'] })
+// ... metadata ...
 
 export default function RootLayout({
   children,
@@ -16,9 +14,16 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.className, "min-h-screen bg-background text-foreground selection:bg-primary/20")}>
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
