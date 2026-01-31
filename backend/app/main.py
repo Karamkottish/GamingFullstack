@@ -4,12 +4,29 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
+from contextlib import asynccontextmanager
+from app.core.database import Base, engine
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure all models are imported so they are registered in Base.metadata
+    from app.modules.auth.models import User
+    from app.modules.wallet.models import Wallet, Transaction
+    from app.modules.agent.models import Commission
+    from app.modules.affiliate.models import AffiliateLink, ClickEvent
+    
+    # Automatic table creation on startup - "Fix for once"
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS
