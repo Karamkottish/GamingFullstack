@@ -3,25 +3,36 @@ from typing import Any, Union, Optional
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from app.core.config import get_settings
-import hashlib
 import uuid
 
 settings = get_settings()
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use Argon2id - Winner of Password Hashing Competition
+# Better security, faster performance, no length limits
+pwd_context = CryptContext(
+    schemes=["argon2"],
+    deprecated="auto",
+    argon2__memory_cost=65536,  # 64 MB
+    argon2__time_cost=3,  # iterations
+    argon2__parallelism=4  # threads
+)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash"""
-    # Pre-hash with SHA256 to handle any length password
-    prehashed = hashlib.sha256(plain_password.encode()).hexdigest()
-    return pwd_context.verify(prehashed, hashed_password)
+    """Verify a password against its hash using Argon2id"""
+    return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    """Hash a password using SHA256 + Bcrypt"""
-    # Pre-hash with SHA256 to get fixed-length output, then bcrypt that
-    # This avoids bcrypt's 72-byte limit while maintaining security
-    prehashed = hashlib.sha256(password.encode()).hexdigest()
-    return pwd_context.hash(prehashed)
+    """
+    Hash a password using Argon2id
+    
+    Argon2id is the winner of the Password Hashing Competition and is
+    recommended by OWASP. It provides:
+    - Better security than bcrypt/scrypt
+    - Resistance to GPU/ASIC attacks
+    - No password length limitations
+    - Tunable performance parameters
+    """
+    return pwd_context.hash(password)
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create a new access token"""
