@@ -15,9 +15,6 @@ async def lifespan(app: FastAPI):
     from app.modules.agent.models import Commission
     from app.modules.affiliate.models import AffiliateLink, ClickEvent
     
-    # Automatic table creation on startup - "Fix for once"
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
 
 app = FastAPI(

@@ -47,7 +47,6 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 async def run_migrations_online() -> None:
-    # Handle the case where we need to run async
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
