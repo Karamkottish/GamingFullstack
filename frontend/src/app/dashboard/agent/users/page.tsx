@@ -275,8 +275,10 @@ export default function AgentUsersPage() {
 
                 {/* Add User Modal */}
                 <Modal isOpen={isAddUserOpen} onClose={() => setIsAddUserOpen(false)} title="Register New Player">
-                    <div className="p-6">
-                        <p className="text-sm text-muted-foreground mb-6">Manually register a new user under your agency. An activation email will be sent to the user.</p>
+                    <div className="space-y-6">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            Manually register a new user under your agency. An activation email will be sent to the user.
+                        </p>
                         <form onSubmit={handleAddUser} className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">

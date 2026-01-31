@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Download, Calendar, DollarSign, Filter, RefreshCcw, History, TrendingUp, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, Landmark } from "lucide-react"
+import { Download, Calendar, DollarSign, Filter, RefreshCcw, History, TrendingUp, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, Landmark, Percent } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
 import { Modal } from "@/components/ui/Modal"
 import { Input } from "@/components/ui/Input"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { Skeleton } from "@/components/ui/Skeleton"
-import { useCommissions, useRequestPayout } from "@/hooks/useAgentDashboard"
+import { useCommissions, useRequestPayout, usePayoutHistory } from "@/hooks/useAgentDashboard"
 import { useWallet } from "@/hooks/useWallet"
 import { motion, AnimatePresence } from "framer-motion"
 import toast from "react-hot-toast"
@@ -17,6 +17,7 @@ export default function AgentCommissionPage() {
     const [page, setPage] = useState(1)
     const [pageSize] = useState(20)
     const [isPayoutOpen, setIsPayoutOpen] = useState(false)
+    const [activeTab, setActiveTab] = useState<'COMMISSIONS' | 'PAYOUTS'>('COMMISSIONS')
 
     // Payout form state
     const [payoutAmount, setPayoutAmount] = useState("")
@@ -24,8 +25,43 @@ export default function AgentCommissionPage() {
     const [walletAddress, setWalletAddress] = useState("")
 
     const { data: commissionsData, isLoading, error, refetch } = useCommissions(page, pageSize)
+    const { data: payoutsData, isLoading: isPayoutsLoading } = usePayoutHistory(page, pageSize)
     const { data: wallet, isLoading: isWalletLoading } = useWallet()
     const payoutMutation = useRequestPayout()
+
+    const handleExportCSV = () => {
+        if (!commissionsData?.commissions || commissionsData.commissions.length === 0) {
+            toast.error("No data to export")
+            return
+        }
+
+        const headers = ["Transaction ID", "User", "Revenue", "Share %", "Status", "Commission Amount", "Date"]
+        const rows = commissionsData.commissions.map(txn => [
+            txn.id,
+            txn.user_name,
+            txn.revenue_generated,
+            txn.commission_rate,
+            txn.status,
+            txn.amount,
+            new Date(txn.date).toLocaleDateString()
+        ])
+
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n")
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+        const link = document.createElement("a")
+        const url = URL.createObjectURL(blob)
+        link.setAttribute("href", url)
+        link.setAttribute("download", `commissions_report_${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        toast.success("Ledger exported successfully")
+    }
 
     const handleRequestPayout = (e: React.FormEvent) => {
         e.preventDefault()
@@ -54,7 +90,9 @@ export default function AgentCommissionPage() {
         })
     }
 
-    const totalPages = Math.ceil((commissionsData?.total || 0) / pageSize)
+    const totalPages = activeTab === 'COMMISSIONS'
+        ? Math.ceil((commissionsData?.total || 0) / pageSize)
+        : Math.ceil((payoutsData?.total || 0) / pageSize)
 
     if (error) {
         return (
@@ -91,14 +129,18 @@ export default function AgentCommissionPage() {
                         <Button variant="outline" className="h-11 px-5 border-white/10 bg-white/5 hover:bg-white/10 text-xs font-bold uppercase tracking-widest gap-2">
                             <Calendar className="h-4 w-4" /> Date Range
                         </Button>
-                        <Button variant="outline" className="h-11 px-5 border-white/10 bg-white/5 hover:bg-white/10 text-xs font-bold uppercase tracking-widest gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handleExportCSV}
+                            className="h-11 px-5 border-white/10 bg-white/5 hover:bg-white/10 text-xs font-bold uppercase tracking-widest gap-2"
+                        >
                             <Download className="h-4 w-4" /> Export Ledger
                         </Button>
                     </div>
                 </motion.div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -139,6 +181,14 @@ export default function AgentCommissionPage() {
                     />
 
                     <CardCard
+                        title="Total Payouts"
+                        value={isWalletLoading ? "..." : `$${wallet?.total_withdrawn?.toLocaleString() || "0"}`}
+                        subText="Settled funds successfully withdrawn"
+                        icon={<CheckCircle2 className="h-5 w-5 text-emerald-400" />}
+                        delay={0.25}
+                    />
+
+                    <CardCard
                         title="Current Agent Tier"
                         value="30%"
                         subText="Tier: Gold Affiliate"
@@ -148,90 +198,183 @@ export default function AgentCommissionPage() {
                     />
                 </div>
 
-                {/* Ledger Table */}
+                {/* Ledger Table Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                 >
                     <Card className="bg-black/30 border-white/10 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl">
-                        <div className="p-8 border-b border-white/5 flex items-center justify-between">
+                        <div className="p-8 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20">
                                     <History className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-bold text-white tracking-tight">Settlement Ledger</h3>
-                                    <p className="text-xs text-muted-foreground uppercase font-black tracking-widest opacity-60">AUDIT TRAIL</p>
+                                    <h3 className="text-xl font-bold text-white tracking-tight">Audit Trail</h3>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">TRANSACTION LEDGER</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-white/10 bg-white/5 hover:bg-white/10">
-                                <Filter className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+
+                            {/* Tab Switcher */}
+                            <div className="flex p-1 bg-white/5 rounded-2xl border border-white/10">
+                                <button
+                                    onClick={() => { setActiveTab('COMMISSIONS'); setPage(1); }}
+                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'COMMISSIONS'
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                        : 'text-muted-foreground hover:text-white'
+                                        }`}
+                                >
+                                    Commissions
+                                </button>
+                                <button
+                                    onClick={() => { setActiveTab('PAYOUTS'); setPage(1); }}
+                                    className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'PAYOUTS'
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                        : 'text-muted-foreground hover:text-white'
+                                        }`}
+                                >
+                                    Payouts
+                                </button>
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-white/5 text-muted-foreground uppercase text-[10px] tracking-widest font-black">
-                                    <tr>
-                                        <th className="px-8 py-5">Transaction ID</th>
-                                        <th className="px-8 py-5">Origin / User</th>
-                                        <th className="px-8 py-5">Revenue</th>
-                                        <th className="px-8 py-5">Share</th>
-                                        <th className="px-8 py-5">Status</th>
-                                        <th className="px-8 py-5 text-right">Commission</th>
-                                    </tr>
+                                    {activeTab === 'COMMISSIONS' ? (
+                                        <tr>
+                                            <th className="px-8 py-5">Transaction ID</th>
+                                            <th className="px-8 py-5">Origin / User</th>
+                                            <th className="px-8 py-5">Revenue</th>
+                                            <th className="px-8 py-5">Share</th>
+                                            <th className="px-8 py-5">Status</th>
+                                            <th className="px-8 py-5 text-right">Commission</th>
+                                        </tr>
+                                    ) : (
+                                        <tr>
+                                            <th className="px-8 py-5">Request ID</th>
+                                            <th className="px-8 py-5">Method / Destination</th>
+                                            <th className="px-8 py-5">Details</th>
+                                            <th className="px-8 py-5">Status</th>
+                                            <th className="px-8 py-5 text-right">Amount</th>
+                                        </tr>
+                                    )}
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     <AnimatePresence mode="popLayout">
-                                        {isLoading ? (
+                                        {(isLoading || isPayoutsLoading) ? (
                                             Array.from({ length: 5 }).map((_, i) => (
                                                 <tr key={i} className="animate-pulse">
                                                     <td colSpan={6} className="px-8 py-6"><Skeleton width="100%" height="20px" /></td>
                                                 </tr>
                                             ))
-                                        ) : commissionsData?.commissions.length === 0 ? (
-                                            <tr>
-                                                <td colSpan={6} className="px-8 py-20 text-center text-muted-foreground">
-                                                    <History className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                                                    <p className="text-sm font-medium opacity-50">No commission records found in your ledger.</p>
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            commissionsData?.commissions.map((txn) => (
-                                                <motion.tr
-                                                    key={txn.id}
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    className="group hover:bg-white/[0.03] transition-colors"
-                                                >
-                                                    <td className="px-8 py-6">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center">
-                                                                <Landmark className="h-4 w-4 text-indigo-400/60" />
+                                        ) : activeTab === 'COMMISSIONS' ? (
+                                            commissionsData?.commissions.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="px-8 py-20 text-center text-muted-foreground">
+                                                        <History className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                                        <p className="text-sm font-medium opacity-50">No commission records found.</p>
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                commissionsData?.commissions.map((txn) => (
+                                                    <motion.tr
+                                                        key={txn.id}
+                                                        initial={{ opacity: 0 }}
+                                                        animate={{ opacity: 1 }}
+                                                        className="group hover:bg-white/[0.03] transition-colors"
+                                                    >
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="h-8 w-8 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center">
+                                                                    <Landmark className="h-4 w-4 text-indigo-400/60" />
+                                                                </div>
+                                                                <span className="font-mono text-[11px] font-bold text-indigo-400 capitalize">{txn.id.slice(0, 8)}</span>
                                                             </div>
-                                                            <span className="font-mono text-[11px] font-bold text-indigo-400 capitalize">{txn.id.slice(0, 8)}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-8 py-6 font-bold text-white tracking-wide">{txn.user_name}</td>
-                                                    <td className="px-8 py-6 font-mono text-xs text-muted-foreground">${txn.revenue_generated.toLocaleString()}</td>
-                                                    <td className="px-8 py-6">
-                                                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] font-bold text-white/50">{txn.commission_rate}%</span>
-                                                    </td>
-                                                    <td className="px-8 py-6">
-                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${txn.status === 'PAID'
+                                                        </td>
+                                                        <td className="px-8 py-6 font-bold text-white tracking-wide">{txn.user_name}</td>
+                                                        <td className="px-8 py-6 font-mono text-xs text-muted-foreground">${txn.revenue_generated.toLocaleString()}</td>
+                                                        <td className="px-8 py-6">
+                                                            <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] font-bold text-white/50">{txn.commission_rate}%</span>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${txn.status === 'PAID'
                                                                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                                                 : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                                            }`}>
-                                                            {txn.status === 'PAID' ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                                                            {txn.status}
-                                                        </span>
+                                                                }`}>
+                                                                {txn.status === 'PAID' ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                                                                {txn.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right">
+                                                            <span className="text-lg font-black text-white tracking-tight">${txn.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                        </td>
+                                                    </motion.tr>
+                                                ))
+                                            )
+                                        ) : (
+                                            payoutsData?.payouts.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="px-8 py-20 text-center text-muted-foreground">
+                                                        <Wallet className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                                                        <p className="text-sm font-medium opacity-50">No payout requests found.</p>
                                                     </td>
-                                                    <td className="px-8 py-6 text-right">
-                                                        <span className="text-lg font-black text-white tracking-tight">${txn.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                                                    </td>
-                                                </motion.tr>
-                                            ))
+                                                </tr>
+                                            ) : (
+                                                payoutsData?.payouts.map((payout) => (
+                                                    <motion.tr
+                                                        key={payout.id}
+                                                        initial={{ opacity: 0 }}
+                                                        animate={{ opacity: 1 }}
+                                                        className="group hover:bg-white/[0.03] transition-colors"
+                                                    >
+                                                        <td className="px-8 py-6">
+                                                            <span className="font-mono text-[11px] font-bold text-primary capitalize">#{payout.id.slice(0, 8)}</span>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex flex-col gap-1.5">
+                                                                <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white uppercase tracking-widest w-fit">{payout.method}</span>
+                                                                {payout.destination && (
+                                                                    <span className="font-mono text-[9px] text-muted-foreground opacity-60 truncate max-w-[150px]">{payout.destination}</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex flex-col gap-1">
+                                                                <span className="font-medium text-white text-xs">{new Date(payout.requested_at).toLocaleDateString()}</span>
+                                                                <span className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">Requested</span>
+                                                                {payout.processed_at && (
+                                                                    <div className="mt-1.5 pt-1.5 border-t border-white/5">
+                                                                        <span className="block font-medium text-emerald-400/80 text-[10px]">{new Date(payout.processed_at).toLocaleDateString()}</span>
+                                                                        <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest">Processed</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6">
+                                                            <div className="flex flex-col gap-2">
+                                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest w-fit ${payout.status === 'PAID' || payout.status === 'APPROVED'
+                                                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                                    : payout.status === 'REJECTED'
+                                                                        ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                                                                        : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                                                    }`}>
+                                                                    {payout.status}
+                                                                </span>
+                                                                {payout.status === 'REJECTED' && payout.rejection_reason && (
+                                                                    <p className="text-[9px] text-red-400/60 font-medium max-w-[120px] leading-tight flex items-center gap-1">
+                                                                        <AlertCircle className="h-2 w-2" /> {payout.rejection_reason}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-8 py-6 text-right font-black text-white">
+                                                            <span className="text-lg tracking-tight">${payout.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                                        </td>
+                                                    </motion.tr>
+                                                ))
+                                            )
                                         )}
                                     </AnimatePresence>
                                 </tbody>
@@ -241,13 +384,13 @@ export default function AgentCommissionPage() {
                         {/* Pagination */}
                         <div className="p-6 border-t border-white/5 bg-white/[0.02] flex items-center justify-between">
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">
-                                SHOWING {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, commissionsData?.total || 0)} OF {commissionsData?.total || 0} RECORDS
+                                SHOWING {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, (activeTab === 'COMMISSIONS' ? commissionsData?.total : payoutsData?.total) || 0)} RECORDS
                             </p>
                             <div className="flex items-center gap-3">
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={page === 1 || isLoading}
+                                    disabled={page === 1 || isLoading || isPayoutsLoading}
                                     onClick={() => setPage(p => p - 1)}
                                     className="h-9 px-4 rounded-xl border-white/10 bg-white/5 hover:bg-white/10"
                                 >
@@ -259,7 +402,7 @@ export default function AgentCommissionPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    disabled={page >= totalPages || isLoading}
+                                    disabled={page >= totalPages || isLoading || isPayoutsLoading}
                                     onClick={() => setPage(p => p + 1)}
                                     className="h-9 px-4 rounded-xl border-white/10 bg-white/5 hover:bg-white/10"
                                 >
@@ -316,8 +459,8 @@ export default function AgentCommissionPage() {
                                             type="button"
                                             onClick={() => setPayoutMethod(method)}
                                             className={`h-12 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all ${payoutMethod === method
-                                                    ? 'bg-indigo-500/20 border-indigo-500/50 text-white'
-                                                    : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10'
+                                                ? 'bg-indigo-500/20 border-indigo-500/50 text-white'
+                                                : 'bg-white/5 border-white/10 text-muted-foreground hover:bg-white/10'
                                                 }`}
                                         >
                                             {method}

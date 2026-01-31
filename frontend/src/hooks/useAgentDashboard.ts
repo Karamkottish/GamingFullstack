@@ -14,6 +14,16 @@ export const commissionKeys = {
     list: (filters: any) => [...commissionKeys.all, 'list', filters] as const,
 }
 
+export const transactionKeys = {
+    all: ['agent', 'transactions'] as const,
+    list: (filters: any) => [...transactionKeys.all, 'list', filters] as const,
+}
+
+export const payoutKeys = {
+    all: ['agent', 'payouts'] as const,
+    history: (filters: any) => [...payoutKeys.all, 'history', filters] as const,
+}
+
 // Stats Hook
 export function useAgentStats() {
     return useQuery({
@@ -56,5 +66,23 @@ export function useRequestPayout() {
         onError: (err: any) => {
             toast.error(err?.response?.data?.detail || 'Failed to submit payout request')
         }
+    })
+}
+
+// Transaction History Hook
+export function useAgentTransactions(page = 1, pageSize = 20, type?: string) {
+    return useQuery({
+        queryKey: transactionKeys.list({ page, pageSize, type }),
+        queryFn: () => AgentService.getTransactions(page, pageSize, type),
+        staleTime: 1000 * 60 * 5,
+    })
+}
+
+// Payout History Hook
+export function usePayoutHistory(page = 1, pageSize = 20, status?: string) {
+    return useQuery({
+        queryKey: payoutKeys.history({ page, pageSize, status }),
+        queryFn: () => AgentService.getPayoutHistory(page, pageSize, status),
+        staleTime: 1000 * 60 * 5,
     })
 }

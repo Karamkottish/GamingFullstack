@@ -62,6 +62,27 @@ export interface PayoutRequest {
     wallet_address?: string
 }
 
+export interface TransactionRecord {
+    id: string
+    type: string
+    amount: number
+    balance_after: number
+    description: string
+    created_at: string
+    status: string
+}
+
+export interface PayoutRecord {
+    id: string
+    amount: number
+    method: string
+    destination?: string
+    status: string
+    requested_at: string
+    processed_at?: string
+    rejection_reason?: string
+}
+
 export const AgentService = {
     // Stats
     getStats: async () => {
@@ -103,6 +124,16 @@ export const AgentService = {
 
     requestPayout: async (data: PayoutRequest) => {
         const response = await api.post('/v1/agent/payouts/request', data)
+        return response.data
+    },
+
+    getTransactions: async (page = 1, page_size = 20, type?: string) => {
+        const response = await api.get<{ transactions: TransactionRecord[], total: number, page: number, page_size: number }>('/v1/agent/transactions', { params: { page, page_size, type } })
+        return response.data
+    },
+
+    getPayoutHistory: async (page = 1, page_size = 20, status?: string) => {
+        const response = await api.get<{ payouts: PayoutRecord[], total: number }>('/v1/agent/payouts', { params: { page, page_size, status } })
         return response.data
     }
 }

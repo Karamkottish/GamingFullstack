@@ -8,6 +8,8 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { Edit2, Save, X, Wallet, Calendar, Mail, Phone, MessageCircle, Shield, CreditCard, LogOut, TrendingUp, DollarSign, ArrowDownToLine, AlertCircle } from 'lucide-react'
 import { AuthService } from '@/services/auth.service'
+import { api } from '@/lib/api-client'
+import { Button } from '@/components/ui/Button'
 import toast from 'react-hot-toast'
 
 function ProfileSkeleton() {
@@ -93,6 +95,12 @@ export default function ProfilePage() {
     const [telegramId, setTelegramId] = useState('')
     const [phoneNumber, setPhoneNumber] = useState('')
 
+    // Password state
+    const [currentPassword, setCurrentPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [isChangingPassword, setIsChangingPassword] = useState(false)
+
     // Initialize form when user data loads
     useState(() => {
         if (user) {
@@ -144,6 +152,35 @@ export default function ProfilePage() {
         setTimeout(() => {
             AuthService.logout()
         }, 500)
+    }
+
+    const handleChangePassword = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (newPassword !== confirmPassword) {
+            toast.error("New passwords do not match")
+            return
+        }
+        if (newPassword.length < 8) {
+            toast.error("Password must be at least 8 characters")
+            return
+        }
+
+        setIsChangingPassword(true)
+        try {
+            // Assuming auth service has changePassword
+            await api.post('/v1/auth/change-password', {
+                current_password: currentPassword,
+                new_password: newPassword
+            })
+            toast.success("Password updated successfully")
+            setCurrentPassword('')
+            setNewPassword('')
+            setConfirmPassword('')
+        } catch (err: any) {
+            toast.error(err.response?.data?.detail || "Failed to update password")
+        } finally {
+            setIsChangingPassword(false)
+        }
     }
 
     // Loading State
@@ -423,6 +460,63 @@ export default function ProfilePage() {
                             </motion.div>
                         )}
                     </motion.div>
+
+                    {/* Change Password Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="bg-gradient-to-br from-card to-card/50 border border-border/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl mt-6"
+                    >
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Shield className="h-6 w-6 text-primary" />
+                            </div>
+                            <h3 className="text-xl font-bold">Security Settings</h3>
+                        </div>
+
+                        <form onSubmit={handleChangePassword} className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <InputField
+                                    label="Current Password"
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={setCurrentPassword}
+                                    disabled={isChangingPassword}
+                                    icon={<Shield className="h-4 w-4" />}
+                                    placeholder="••••••••"
+                                />
+                                <InputField
+                                    label="New Password"
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={setNewPassword}
+                                    disabled={isChangingPassword}
+                                    icon={<Shield className="h-4 w-4" />}
+                                    placeholder="••••••••"
+                                />
+                                <InputField
+                                    label="Confirm New Password"
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={setConfirmPassword}
+                                    disabled={isChangingPassword}
+                                    icon={<Shield className="h-4 w-4" />}
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                            <div className="flex justify-end">
+                                <Button
+                                    type="submit"
+                                    disabled={isChangingPassword || !newPassword}
+                                    isLoading={isChangingPassword}
+                                    className="px-8 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium"
+                                >
+                                    Update Password
+                                </Button>
+                            </div>
+                        </form>
+                    </motion.div>
                 </div>
 
                 {/* Logout Confirmation Modal */}
@@ -522,7 +616,8 @@ function InputField({
     onChange,
     disabled,
     icon,
-    placeholder
+    placeholder,
+    type = "text"
 }: {
     label: string
     value: string
@@ -530,6 +625,7 @@ function InputField({
     disabled: boolean
     icon: React.ReactNode
     placeholder?: string
+    type?: string
 }) {
     return (
         <div>
@@ -539,7 +635,7 @@ function InputField({
                     {icon}
                 </div>
                 <input
-                    type="text"
+                    type={type}
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     disabled={disabled}
