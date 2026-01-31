@@ -2,6 +2,8 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from uuid import UUID
 from typing import Optional
 from app.modules.auth.models import UserRole
+from decimal import Decimal
+from datetime import datetime
 import re
 
 class UserBase(BaseModel):
@@ -9,6 +11,7 @@ class UserBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     telegram_id: Optional[str] = Field(None, max_length=100)
+    phone_number: Optional[str] = Field(None, max_length=20)
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128)
@@ -21,15 +24,6 @@ class UserCreate(UserBase):
         """Validate password meets minimum security requirements"""
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters long')
-        
-        # Optional: enforce stronger requirements
-        # if not re.search(r'[A-Z]', v):
-        #     raise ValueError('Password must contain at least one uppercase letter')
-        # if not re.search(r'[a-z]', v):
-        #     raise ValueError('Password must contain at least one lowercase letter')
-        # if not re.search(r'[0-9]', v):
-        #     raise ValueError('Password must contain at least one number')
-        
         return v
     
     @field_validator('email')
@@ -85,3 +79,42 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+
+# Profile-specific schemas
+class WalletInfo(BaseModel):
+    """Wallet information for profile"""
+    id: UUID
+    balance: Decimal
+    currency: str = "USD"
+    is_frozen: bool
+    
+    class Config:
+        from_attributes = True
+
+class UserProfileResponse(BaseModel):
+    """Comprehensive user profile with wallet info"""
+    id: UUID
+    email: str
+    first_name: str
+    last_name: str
+    full_name: str
+    telegram_id: Optional[str] = None
+    phone_number: Optional[str] = None
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+    wallet: Optional[WalletInfo] = None
+    
+    class Config:
+        from_attributes = True
+
+class UpdateProfileRequest(BaseModel):
+    """Request to update user profile"""
+    first_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=50)
+    telegram_id: Optional[str] = Field(None, max_length=100)
+    phone_number: Optional[str] = Field(None, max_length=20)
+    
+    class Config:
+        # Don't allow empty strings
+        str_strip_whitespace = True

@@ -23,6 +23,7 @@ class User(Base):
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
     telegram_id = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)
     
     # Hierarchy
     agent_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)

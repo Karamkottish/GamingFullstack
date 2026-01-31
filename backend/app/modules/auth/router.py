@@ -8,14 +8,19 @@ from app.modules.auth.schemas import (
     UserAuthResponse,
     RefreshTokenRequest,
     TokenResponse,
-    ErrorResponse
+    ErrorResponse,
+    UpdateProfileRequest,
+    UserProfileResponse
 )
+from app.modules.auth import schemas
+from app.modules.auth.models import User
 from app.modules.auth.service import AuthService
 from app.core.security import (
     create_access_token,
     create_refresh_token,
     decode_refresh_token
 )
+from app.core import dependencies
 from app.core.exceptions import InvalidTokenError
 import logging
 
@@ -182,3 +187,120 @@ async def logout():
     # 2. Invalidate all refresh tokens for the user
     # 3. Log the logout event
     return None
+
+@router.get(
+    "/profile",
+    response_model=schemas.UserProfileResponse,
+    responses={
+        200: {
+            "description": "User profile retrieved successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "123e4567-e89b-12d3-a456-426614174000",
+                        "email": "user@example.com",
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "full_name": "John Doe",
+                        "telegram_id": "@johndoe",
+                        "role": "USER",
+                        "is_active": True,
+                        "created_at": "2024-01-31T12:00:00",
+                        "wallet": {
+                            "id": "123e4567-e89b-12d3-a456-426614174001",
+                            "balance": "1000.00",
+                            "currency": "USD",
+                            "is_frozen": False
+                        }
+                    }
+                }
+            }
+        },
+        401: {"model": schemas.ErrorResponse, "description": "Invalid or expired token"},
+        403: {"model": schemas.ErrorResponse, "description": "Account is inactive"},
+    },
+    summary="Get Current User Profile",
+    description="""
+    Retrieve the authenticated user's profile information including wallet details.
+    
+    **Works for all roles**: USER, AGENT, AFFILIATE, ADMIN
+    
+    **Performance**: Uses optimized eager loading for wallet data to minimize database queries.
+    
+    **Authentication Required**: Yes - Pass JWT access token in Authorization header.
+    """
+)
+async def get_profile(
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Get current user profile with wallet information
+    
+    Returns complete user profile including:
+    - Personal information (name, email, telegram)
+    - Account status and role
+    - Wallet balance and status
+    - Account creation date
+    """
+    try:
+        logger.info(f"Profile accessed by user: {current_user.email}")
+        return current_user
+    except Exception as e:
+        logger.error(f"Error fetching profile: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch profile"
+        )
+
+@router.put(
+    "/profile",
+    response_model=schemas.UserProfileResponse,
+    responses={
+        200: {"description": "Profile updated successfully"},
+        400: {"model": schemas.ErrorResponse, "description": "Invalid input data"},
+        401: {"model": schemas.ErrorResponse, "description": "Invalid or expired token"},
+    },
+    summary="Update User Profile",
+    description="""
+    Update the authenticated user's profile information.
+    
+    **Updatable fields**:
+    - first_name
+    - last_name  
+    - telegram_id
+    
+    **Note**: Email and role cannot be changed through this endpoint.
+    """
+)
+async def update_profile(
+    profile_update: schemas.UpdateProfileRequest,
+    current_user: User = Depends(dependencies.get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update current user's profile
+    
+    Only the fields provided in the request will be updated.
+    Omitted fields will remain unchanged.
+    """
+    try:
+        # Update only provided fields
+        update_data = profile_update.model_dump(exclude_unset=True)
+        
+        for field, value in update_data.items():
+            setattr(current_user, field, value)
+        
+        await db.commit()
+        await db.refresh(current_user)
+        
+        logger.info(f"Profile updated for user: {current_user.email}")
+        return current_user
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error updating profile: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update profile"
+        )
+
