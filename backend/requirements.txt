@@ -3,6 +3,7 @@ uvicorn[standard]
 sqlalchemy
 alembic
 asyncpg
+psycopg2-binary
 pydantic
 pydantic-settings
 python-jose[cryptography]
