@@ -11,7 +11,6 @@ class UserBase(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=50)
     last_name: str = Field(..., min_length=1, max_length=50)
     telegram_id: Optional[str] = Field(None, max_length=100)
-    phone_number: Optional[str] = Field(None, max_length=20)
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128)
@@ -99,7 +98,6 @@ class UserProfileResponse(BaseModel):
     last_name: str
     full_name: str
     telegram_id: Optional[str] = None
-    phone_number: Optional[str] = None
     role: UserRole
     is_active: bool
     created_at: datetime
@@ -113,7 +111,6 @@ class UpdateProfileRequest(BaseModel):
     first_name: Optional[str] = Field(None, min_length=1, max_length=50)
     last_name: Optional[str] = Field(None, min_length=1, max_length=50)
     telegram_id: Optional[str] = Field(None, max_length=100)
-    phone_number: Optional[str] = Field(None, max_length=20)
     
     class Config:
         # Don't allow empty strings
