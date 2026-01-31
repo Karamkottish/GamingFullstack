@@ -11,6 +11,7 @@ from typing import Optional, List
 from decimal import Decimal
 from datetime import datetime, timedelta
 from uuid import UUID
+import uuid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -386,9 +387,9 @@ class AgentService:
         
         offset = (page - 1) * page_size
         
-        # Get commissions with user info
+        # Get commissions with user info - Use outerjoin in case the source user was deleted/missing
         result = await db.execute(
-            select(Commission, User).join(User, Commission.user_id == User.id)
+            select(Commission, User).outerjoin(User, Commission.user_id == User.id)
             .where(Commission.agent_id == agent_id)
             .order_by(Commission.created_at.desc())
             .offset(offset)
@@ -411,15 +412,18 @@ class AgentService:
         
         commission_list = []
         for commission, user in data:
+            # Handle potential None values for numeric operations
+            amt = commission.amount or Decimal("0")
+            
             commission_list.append(schemas.CommissionRecord(
                 id=commission.id,
-                user_id=user.id,
-                user_name=user.full_name,
-                amount=commission.amount,
-                revenue_generated=commission.amount * Decimal("10"),  # Estimate
+                user_id=commission.user_id or uuid.uuid4(), # Fallback UUID if missing
+                user_name=user.full_name if user else "Unknown User",
+                amount=amt,
+                revenue_generated=amt * Decimal("10"),  # Estimate
                 commission_rate=Decimal("10"),  # Default 10%
                 date=commission.created_at,
-                status=commission.status
+                status=commission.status or "PAID"
             ))
         
         return schemas.CommissionsList(
