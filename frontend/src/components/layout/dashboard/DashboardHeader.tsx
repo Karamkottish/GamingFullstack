@@ -1,9 +1,28 @@
 "use client"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Bell, Search, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
+import { UserService } from "@/services/user.service"
+import { User } from "@/services/auth.service"
 
 export function DashboardHeader({ role }: { role: string }) {
+    const router = useRouter()
+    const [user, setUser] = useState<User | null>(null)
+
+    useEffect(() => {
+        UserService.getProfile()
+            .then(setUser)
+            .catch(() => { }) // Silent fail, user will see default
+    }, [])
+
+    const handleProfileClick = () => {
+        const settingsPath = role === 'AGENT' ? '/dashboard/agent/settings' : '/dashboard/affiliate/settings'
+        router.push(settingsPath)
+    }
+
+    const displayName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email : 'Loading...'
     return (
         <header className="h-16 border-b border-white/10 bg-black/60 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
             <div className="flex items-center gap-4 w-96">
@@ -24,14 +43,14 @@ export function DashboardHeader({ role }: { role: string }) {
 
                 <div className="h-8 w-[1px] bg-white/10" />
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 cursor-pointer group" onClick={handleProfileClick}>
                     <div className="text-right hidden md:block">
-                        <p className="text-sm font-medium text-white">John Doe</p>
+                        <p className="text-sm font-medium text-white group-hover:text-primary transition-colors">{displayName}</p>
                         <p className="text-xs text-muted-foreground capitalize">{role.toLowerCase()}</p>
                     </div>
-                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-violet-600 p-[1px]">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-violet-600 p-[1px] group-hover:scale-110 transition-transform">
                         <div className="h-full w-full rounded-full bg-black flex items-center justify-center">
-                            <UserCircle className="h-full w-full text-white/80" />
+                            <UserCircle className="h-full w-full text-white/80 group-hover:text-primary transition-colors" />
                         </div>
                     </div>
                 </div>

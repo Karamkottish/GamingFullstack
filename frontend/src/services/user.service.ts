@@ -5,17 +5,17 @@ export interface UpdateProfilePayload {
     first_name?: string
     last_name?: string
     telegram_id?: string
-    phone?: string
+    phone_number?: string
 }
 
 export const UserService = {
     getProfile: async () => {
-        const response = await api.get<User>('/user/profile')
+        const response = await api.get<User>('/v1/auth/profile')
         return response.data
     },
 
     updateProfile: async (data: UpdateProfilePayload) => {
-        const response = await api.put<User>('/user/profile', data)
+        const response = await api.put<User>('/v1/auth/profile', data)
         return response.data
     },
 

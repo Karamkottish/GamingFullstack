@@ -1,15 +1,25 @@
 import { api } from '@/lib/api-client';
 
-// Types based on Screenshots
+// Types based on API Response
+export interface Wallet {
+    id: string;
+    balance: string;
+    currency: string;
+    is_frozen: boolean;
+}
+
 export interface User {
     id: string;
     email: string;
     first_name: string;
     last_name: string;
+    full_name?: string;
     telegram_id: string;
+    phone_number?: string;
     role: 'AGENT' | 'AFFILIATE' | 'USER' | 'ADMIN';
     is_active: boolean;
-    // full_name might be computed or present based on screenshots
+    created_at: string;
+    wallet?: Wallet;
 }
 
 export interface AuthResponse {
@@ -29,8 +39,9 @@ export interface RegisterPayload {
     first_name: string;
     last_name: string;
     telegram_id: string;
+    phone_number?: string;
     password: string;
-    role: 'AGENT' | 'AFFILIATE'; // Restricted for frontend registration
+    role: 'AGENT' | 'AFFILIATE';
     invite_code?: string;
 }
 

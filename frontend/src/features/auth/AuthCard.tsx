@@ -5,7 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { Gamepad2, User, Users, ArrowRight, Mail, Lock, UserCircle, Eye, EyeOff } from "lucide-react"
+import { Gamepad2, User, Users, ArrowRight, Mail, Lock, UserCircle, Eye, EyeOff, MessageCircle } from "lucide-react"
+import PhoneInput from "@/components/ui/PhoneInput"
 import { AuthService, LoginPayload, RegisterPayload } from "@/services/auth.service"
 import { toast } from "sonner"
 
@@ -32,6 +33,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
     const [firstName, setFirstName] = useState("")
     const [lastName, setLastName] = useState("")
     const [telegram, setTelegram] = useState("")
+    const [phoneNumber, setPhoneNumber] = useState("")
 
     // Toggle mode triggers the flip
     const toggleMode = () => setMode(mode === "login" ? "register" : "login")
@@ -64,16 +66,23 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                     first_name: firstName,
                     last_name: lastName,
                     telegram_id: telegram,
-                    role: role // AGENT or AFFILIATE selected in UI
+                    phone_number: phoneNumber || undefined,
+                    role: role
                 }
                 const response = await AuthService.register(payload)
 
+                // Store tokens immediately (backend returns them on register with 201)
+                localStorage.setItem('access_token', response.access_token)
+                localStorage.setItem('refresh_token', response.refresh_token)
+                localStorage.setItem('user_role', response.user.role)
+
                 toast.success("Account Created!", {
-                    description: "Please check your email to verify your account."
+                    description: `Welcome, ${response.user.first_name}! Redirecting to your dashboard...`
                 })
 
-                // Switch to login or auto-login
-                setMode("login")
+                // Auto-redirect to dashboard based on role
+                const targetRole = response.user.role === 'AGENT' ? '/dashboard/agent' : '/dashboard/affiliate'
+                setTimeout(() => router.push(targetRole), 1500)
             }
         } catch (error: any) {
             // Error is handled globally by api-client interceptor usually, 

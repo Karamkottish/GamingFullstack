@@ -1,6 +1,7 @@
 "use client"
-import SettingsPage from "@/app/dashboard/agent/settings/page"
+
+import ProfilePage from '@/features/profile/ProfilePage'
 
 export default function AffiliateSettingsPage() {
-    return <SettingsPage />
+    return <ProfilePage />
 }
