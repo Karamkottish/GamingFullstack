@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Gamepad2, User, Users, ArrowRight, Mail, Lock, UserCircle } from "lucide-react"
@@ -17,6 +18,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
     const [mode, setMode] = useState<AuthMode>(initialMode)
     const [role, setRole] = useState<Role>("AGENT")
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter()
 
     // Toggle mode triggers the flip
     const toggleMode = () => setMode(mode === "login" ? "register" : "login")
@@ -24,7 +26,16 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
-        setTimeout(() => setIsLoading(false), 2000)
+
+        // Mock Login Delay then Redirect
+        setTimeout(() => {
+            setIsLoading(false)
+            if (role === "AGENT") {
+                router.push("/dashboard/agent")
+            } else {
+                router.push("/dashboard/affiliate")
+            }
+        }, 1500)
     }
 
     return (
@@ -50,7 +61,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" required />
+                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" />
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -60,7 +71,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 </div>
                                 <div className="relative group">
                                     <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="••••••••" required />
+                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="••••••••" />
                                 </div>
                             </div>
 
@@ -84,11 +95,11 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">First Name</label>
-                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="John" required />
+                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="John" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Last Name</label>
-                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="Doe" required />
+                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="Doe" />
                                 </div>
                             </div>
 
@@ -96,7 +107,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Work Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" required />
+                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" />
                                 </div>
                             </div>
 
@@ -104,7 +115,7 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Password</label>
                                 <div className="relative group">
                                     <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="Create a strong password" required />
+                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="Create a strong password" />
                                 </div>
                             </div>
 
