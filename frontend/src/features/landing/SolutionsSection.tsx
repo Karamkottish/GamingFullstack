@@ -1,6 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
-import { Monitor, Smartphone, Database, Server, Code2, Layers } from "lucide-react"
+import { Monitor, Smartphone, Database, Layers } from "lucide-react"
 
 const solutions = [
     {
@@ -8,28 +8,32 @@ const solutions = [
         title: "Turnkey Casino",
         icon: <Monitor className="h-6 w-6" />,
         description: "Ready-to-launch platform with 5000+ games pre-integrated. Go live in 48 hours.",
-        color: "from-violet-500 to-purple-500"
+        color: "from-violet-500 to-purple-500",
+        image: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&q=80&w=800"
     },
     {
-        id: "sportsbook",
+        id: "sportsbook-final",
         title: "Sportsbook API",
         icon: <Smartphone className="h-6 w-6" />,
         description: "Live odds for 50+ sports including eSports. High-frequency updates and risk management.",
-        color: "from-blue-500 to-cyan-500"
+        color: "from-blue-500 to-cyan-500",
+        image: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?auto=format&fit=crop&q=80&w=800"
     },
     {
         id: "crypto",
         title: "Crypto Gateway",
         icon: <Database className="h-6 w-6" />,
         description: "Accept BTC, ETH, USDT and 50+ altcoins with automated settlements and cold storage.",
-        color: "from-yellow-500 to-orange-500"
+        color: "from-yellow-500 to-orange-500",
+        image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=800"
     },
     {
         id: "agent",
         title: "Agent System",
         icon: <UsersIcon />,
         description: "Multi-level agent management network (MLM-ready) with credit distribution logic.",
-        color: "from-pink-500 to-rose-500"
+        color: "from-pink-500 to-rose-500",
+        image: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800"
     }
 ]
 
@@ -71,36 +75,42 @@ function SolutionCard({ solution, index }: { solution: any, index: number }) {
             className={`
                 group relative flex-1 min-h-[200px] lg:min-h-full rounded-3xl overflow-hidden cursor-pointer
                 transition-all duration-500 ease-in-out hover:flex-[3]
-                border border-white/10 dark:border-white/5
+                border border-white/10 dark:border-white/5 bg-black
             `}
         >
-            {/* Background Gradient */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${solution.color} opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+            {/* Background Image with Zoom Effect */}
+            <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110 opacity-40 group-hover:opacity-60"
+                style={{ backgroundImage: `url(${solution.image})` }}
+            />
+
+            {/* Gradient Overlay */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${solution.color} opacity-20 group-hover:opacity-10 transition-opacity duration-500 mix-blend-overlay`} />
 
             {/* Content Container */}
-            <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col justify-end h-full bg-gradient-to-t from-background/90 via-background/40 to-transparent">
+            <div className="absolute bottom-0 left-0 w-full p-8 flex flex-col justify-end h-full z-10">
                 <div className="flex items-center gap-4 mb-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-br ${solution.color} text-white shadow-lg`}>
                         {solution.icon}
                     </div>
-                    <h3 className="text-2xl font-bold text-foreground group-hover:scale-105 transition-transform origin-left">
+                    <h3 className="text-2xl font-bold text-white group-hover:scale-105 transition-transform origin-left drop-shadow-md">
                         {solution.title}
                     </h3>
                 </div>
 
                 <div className="lg:max-h-0 lg:group-hover:max-h-[200px] overflow-hidden transition-all duration-500 ease-in-out">
-                    <p className="text-muted-foreground text-lg leading-relaxed opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100">
+                    <p className="text-white/80 text-lg leading-relaxed opacity-0 lg:group-hover:opacity-100 transition-opacity duration-500 delay-100">
                         {solution.description}
                     </p>
-                    <button className="mt-6 text-sm font-semibold text-primary flex items-center gap-2 hover:gap-3 transition-all">
+                    <button className="mt-6 text-sm font-semibold text-white flex items-center gap-2 hover:gap-3 transition-all group-hover:text-primary-foreground">
                         Learn more <span className="text-lg">→</span>
                     </button>
                 </div>
 
                 {/* Mobile Fallback: always show text on mobile since hover expansion is tricky */}
                 <div className="block lg:hidden mt-2">
-                    <p className="text-muted-foreground text-sm">
+                    <p className="text-white/70 text-sm">
                         {solution.description}
                     </p>
                 </div>
