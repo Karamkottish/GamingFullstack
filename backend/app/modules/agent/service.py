@@ -223,6 +223,54 @@ class AgentService:
         )
     
     @staticmethod
+    async def toggle_user_status(
+        db: AsyncSession,
+        agent_id: UUID,
+        user_id: UUID
+    ) -> schemas.AgentUserResponse:
+        """
+        Block or unblock a user (toggle is_active status).
+        Fast: Single query with validation.
+        """
+        
+        # Get user and verify ownership in one query
+        result = await db.execute(
+            select(User).where(
+                and_(
+                    User.id == user_id,
+                    User.agent_id == agent_id  # Security: ensure agent owns this user
+                )
+            )
+        )
+        user = result.scalars().first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found or not owned by this agent"
+            )
+        
+        # Toggle status
+        user.is_active = not user.is_active
+        
+        await db.commit()
+        await db.refresh(user)
+        
+        action = "blocked" if not user.is_active else "unblocked"
+        logger.info(f"Agent {agent_id} {action} user {user_id}")
+        
+        return schemas.AgentUserResponse(
+            id=user.id,
+            email=user.email,
+            full_name=user.full_name,
+            status="ACTIVE" if user.is_active else "BLOCKED",
+            joined_at=user.created_at,
+            total_deposited=Decimal("0"),
+            total_wagered=Decimal("0"),
+            last_active=None
+        )
+    
+    @staticmethod
     async def get_wallet_balance(db: AsyncSession, agent_id: UUID) -> schemas.WalletBalance:
         """Get agent wallet balance"""
         

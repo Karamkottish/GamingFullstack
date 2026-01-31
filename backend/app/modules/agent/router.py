@@ -99,6 +99,36 @@ async def add_new_user(
             detail="Failed to create user"
         )
 
+@router.patch(
+    "/users/{user_id}/status",
+    response_model=schemas.AgentUserResponse,
+    summary="Block/Unblock User",
+    description="Toggle user active status (block or unblock). Single efficient API for both actions."
+)
+async def toggle_user_status(
+    user_id: UUID,
+    current_user: User = Depends(get_current_agent),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Block or unblock a user with a single API call.
+    
+    - Automatically toggles the user's `is_active` status
+    - If user is active → blocks them
+    - If user is blocked → unblocks them
+    - Fast: Single database query
+    """
+    try:
+        return await AgentService.toggle_user_status(db, current_user.id, user_id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error toggling user status: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update user status"
+        )
+
 @router.get(
     "/wallet",
     response_model=schemas.WalletBalance,
