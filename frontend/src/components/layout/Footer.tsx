@@ -47,9 +47,9 @@ export function Footer() {
                             <li><Link href="#" className="hover:text-primary transition-colors">Compliance</Link></li>
                         </ul>
                         <div className="flex gap-4 mt-6">
-                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Twitter className="h-5 w-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Discord className="h-5 w-5" /></Link>
-                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors"><Github className="h-5 w-5" /></Link>
+                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Twitter"><Twitter className="h-5 w-5" /></Link>
+                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Discord"><Discord className="h-5 w-5" /></Link>
+                            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Github"><Github className="h-5 w-5" /></Link>
                         </div>
                     </div>
                 </div>

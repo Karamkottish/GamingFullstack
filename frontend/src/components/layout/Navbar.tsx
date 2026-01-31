@@ -41,7 +41,7 @@ export function Navbar() {
 
                 <div className="flex items-center gap-2 md:hidden">
                     <ThemeToggle />
-                    <button className="p-2" onClick={() => setIsOpen(!isOpen)}>
+                    <button className="p-2" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
                         <Menu className="h-6 w-6" />
                     </button>
                 </div>
