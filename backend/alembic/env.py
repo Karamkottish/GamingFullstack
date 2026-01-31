@@ -20,7 +20,7 @@ from app.modules.affiliate.models import AffiliateLink, ClickEvent
 config = context.config
 
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
