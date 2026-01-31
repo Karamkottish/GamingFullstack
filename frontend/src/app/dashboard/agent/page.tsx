@@ -1,7 +1,9 @@
 "use client"
+import { useState, useEffect } from "react"
 import { Users, Wallet, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import dynamic from 'next/dynamic'
+import { AgentService, AgentStats } from "@/services/agent.service"
 
 const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(mod => mod.UserGlobe), {
     ssr: false,
@@ -14,6 +16,22 @@ const AgentRevenueChart = dynamic(() => import('@/components/dashboard/charts/Ag
 })
 
 export default function AgentDashboard() {
+    const [stats, setStats] = useState<AgentStats | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const data = await AgentService.getStats()
+                setStats(data)
+            } catch (error) {
+                console.error('Failed to fetch stats:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchStats()
+    }, [])
     return (
         <div className="space-y-8">
             <div className="flex flex-col gap-2">
@@ -25,27 +43,31 @@ export default function AgentDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4">
                 <StatsCard
                     title="Total Users"
-                    value="1,234"
+                    value={loading ? "..." : (stats?.totalUsers?.toLocaleString() || "0")}
                     change="+12% from last month"
                     icon={<Users className="h-4 w-4 text-violet-400" />}
+                    loading={loading}
                 />
                 <StatsCard
                     title="Total Revenue"
-                    value="$45,231.89"
+                    value={loading ? "..." : `$${stats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}`}
                     change="+20.1% from last month"
                     icon={<TrendingUp className="h-4 w-4 text-green-400" />}
+                    loading={loading}
                 />
                 <StatsCard
                     title="Pending Commission"
-                    value="$2,400.00"
+                    value={loading ? "..." : `$${stats?.pendingCommission?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}`}
                     change="Due in 3 days"
                     icon={<Card className="h-4 w-4 text-amber-400" />}
+                    loading={loading}
                 />
                 <StatsCard
                     title="Withdrawable Balance"
-                    value="$12,234.00"
+                    value={loading ? "..." : `$${stats?.withdrawableBalance?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "0.00"}`}
                     change="Available now"
                     icon={<Wallet className="h-4 w-4 text-blue-400" />}
+                    loading={loading}
                 />
             </div>
 
@@ -71,9 +93,9 @@ export default function AgentDashboard() {
     )
 }
 
-function StatsCard({ title, value, change, icon }: { title: string, value: string, change: string, icon: React.ReactNode }) {
+function StatsCard({ title, value, change, icon, loading }: { title: string, value: string, change: string, icon: React.ReactNode, loading?: boolean }) {
     return (
-        <Card className="p-6 bg-black/40 border-white/10 backdrop-blur-sm hover:border-primary/20 transition-all group">
+        <Card className={`p-6 bg-black/40 border-white/10 backdrop-blur-sm hover:border-primary/20 transition-all group ${loading ? 'animate-pulse' : ''}`}>
             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <h3 className="tracking-tight text-sm font-medium text-muted-foreground group-hover:text-white transition-colors">
                     {title}

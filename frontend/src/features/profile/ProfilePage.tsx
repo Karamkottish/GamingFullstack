@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { UserService, UpdateProfilePayload } from '@/services/user.service'
 import { User } from '@/services/auth.service'
+import { AgentService, WalletBalance } from '@/services/agent.service'
 import { toast } from 'sonner'
-import { Edit2, Save, X, Wallet, Calendar, Mail, Phone, MessageCircle, Shield, CreditCard, LogOut } from 'lucide-react'
+import { Edit2, Save, X, Wallet, Calendar, Mail, Phone, MessageCircle, Shield, CreditCard, LogOut, TrendingUp, DollarSign, ArrowDownToLine } from 'lucide-react'
 import { AuthService } from '@/services/auth.service'
 
 export default function ProfilePage() {
     const [user, setUser] = useState<User | null>(null)
+    const [wallet, setWallet] = useState<WalletBalance | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
@@ -35,6 +37,16 @@ export default function ProfilePage() {
             setLastName(data.last_name || '')
             setTelegramId(data.telegram_id || '')
             setPhoneNumber(data.phone_number || '')
+
+            // Load wallet for agents
+            if (data.role === 'AGENT') {
+                try {
+                    const walletData = await AgentService.getWallet()
+                    setWallet(walletData)
+                } catch (error) {
+                    console.error('Failed to load wallet:', error)
+                }
+            }
         } catch (error) {
             toast.error('Failed to load profile')
         } finally {
@@ -217,6 +229,71 @@ export default function ProfilePage() {
                                     placeholder="+1234567890"
                                 />
                             </div>
+
+                            {/* Wallet Balance Section - AGENTS ONLY */}
+                            {user.role === 'AGENT' && wallet && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="pt-6 mt-6 border-t border-white/10"
+                                >
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Wallet className="h-5 w-5 text-primary" />
+                                        <h3 className="text-lg font-semibold text-foreground">Wallet Balance</h3>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {/* Commission Balance */}
+                                        <div className="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-xl p-4 hover:border-green-500/40 transition-all group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm text-muted-foreground">Commission Balance</span>
+                                                <DollarSign className="h-4 w-4 text-green-400 group-hover:scale-110 transition-transform" />
+                                            </div>
+                                            <p className="text-2xl font-bold text-foreground">
+                                                ${wallet.commission_balance?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                                            </p>
+                                            <span className="text-xs text-green-400">Available</span>
+                                        </div>
+
+                                        {/* Pending Commission */}
+                                        <div className="bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20 rounded-xl p-4 hover:border-amber-500/40 transition-all group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm text-muted-foreground">Pending</span>
+                                                <TrendingUp className="h-4 w-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                                            </div>
+                                            <p className="text-2xl font-bold text-foreground">
+                                                ${wallet.pending_commission?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                                            </p>
+                                            <span className="text-xs text-amber-400">Processing</span>
+                                        </div>
+
+                                        {/* Total Withdrawn */}
+                                        <div className="bg-gradient-to-br from-blue-500/10 to-transparent border border-blue-500/20 rounded-xl p-4 hover:border-blue-500/40 transition-all group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm text-muted-foreground">Total Withdrawn</span>
+                                                <ArrowDownToLine className="h-4 w-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                                            </div>
+                                            <p className="text-2xl font-bold text-foreground">
+                                                ${wallet.total_withdrawn?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                                            </p>
+                                            <span className="text-xs text-blue-400">Lifetime</span>
+                                        </div>
+
+                                        {/* Total Earned */}
+                                        <div className="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-xl p-4 hover:border-purple-500/40 transition-all group">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm text-muted-foreground">Total Earned</span>
+                                                <CreditCard className="h-4 w-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                                            </div>
+                                            <p className="text-2xl font-bold text-foreground">
+                                                ${wallet.total_earned?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                                            </p>
+                                            <span className="text-xs text-purple-400">All time</span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
 
                             {/* Action Buttons */}
                             {isEditing && (
