@@ -16,6 +16,14 @@ class Settings(BaseSettings):
     
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
+    @property
+    def ASYNC_DATABASE_URL(self):
+        if self.DATABASE_URL and self.DATABASE_URL.startswith("postgres://"):
+            return self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+        if self.DATABASE_URL and self.DATABASE_URL.startswith("postgresql://"):
+            return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return self.DATABASE_URL
+
 @lru_cache
 def get_settings():
     return Settings()
