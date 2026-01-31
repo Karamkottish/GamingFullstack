@@ -57,6 +57,16 @@ const config: Config = {
                 md: "calc(var(--radius) - 2px)",
                 sm: "calc(var(--radius) - 4px)",
             },
+            animation: {
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                float: "float 6s ease-in-out infinite",
+                pulse: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                "spin-slow": "spin 3s linear infinite",
+                "fade-in-up": "fade-in-up 0.8s ease-out forwards",
+                "fade-in-up-delay-1": "fade-in-up 0.8s ease-out 0.2s forwards",
+                "fade-in-up-delay-2": "fade-in-up 0.8s ease-out 0.4s forwards",
+            },
             keyframes: {
                 "accordion-down": {
                     from: { height: "0" },
@@ -73,14 +83,11 @@ const config: Config = {
                 pulse: {
                     "0%, 100%": { opacity: "1" },
                     "50%": { opacity: "0.5" },
+                },
+                "fade-in-up": {
+                    "0%": { opacity: "0", transform: "translateY(20px)" },
+                    "100%": { opacity: "1", transform: "translateY(0)" },
                 }
-            },
-            animation: {
-                "accordion-down": "accordion-down 0.2s ease-out",
-                "accordion-up": "accordion-up 0.2s ease-out",
-                float: "float 6s ease-in-out infinite",
-                pulse: "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                "spin-slow": "spin 3s linear infinite",
             },
         },
     },

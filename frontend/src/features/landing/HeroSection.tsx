@@ -7,51 +7,33 @@ export function HeroSection() {
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
 
-            {/* Background Ambience */}
-            <div className="absolute inset-0 w-full h-full bg-background">
-                <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
-                <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px]" />
-                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+            {/* Background Ambience - Optimized with GPU Acceleration */}
+            <div className="absolute inset-0 w-full h-full bg-background pointer-events-none">
+                <div className="absolute top-[-20%] right-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full bg-primary/20 blur-[100px] animate-pulse transform-gpu" />
+                <div className="absolute bottom-[-20%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] rounded-full bg-blue-600/10 blur-[100px] transform-gpu" />
+                <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20 [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
             </div>
 
             <div className="container relative z-10 px-4 md:px-6 flex flex-col items-center text-center">
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-primary mb-8 hover:bg-white/10 transition-colors cursor-default backdrop-blur-md"
-                >
+                {/* LCP: First Paint Content (No Framer Motion blocking) */}
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-primary mb-8 hover:bg-white/10 transition-colors cursor-default backdrop-blur-md animate-fade-in-up opacity-0">
                     <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                     Next-Gen Gaming Infrastructure
-                </motion.div>
+                </div>
 
-                <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    className="text-4xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-white/50 mb-6 max-w-4xl"
-                >
-                    Launch Your Casino & Sportsbook in <span className="text-primary">Minutes</span>
-                </motion.h1>
+                <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-white mb-6 max-w-4xl animate-fade-in-up-delay-1 opacity-0">
+                    Launch Your Casino & <br className="hidden md:block" />
+                    Sportsbook in <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Minutes</span>
+                </h1>
 
-                <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10"
-                >
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mb-10 animate-fade-in-up-delay-2 opacity-0">
                     The most advanced white-label solution for iGaming.
                     Empower your agents, track affiliates, and scale globally with our
                     enterprise-grade platform.
-                </motion.p>
+                </p>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
-                >
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-fade-in-up-delay-2 opacity-0">
                     <Button variant="glow" size="lg" className="group">
                         Start Building Now
                         <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -59,9 +41,9 @@ export function HeroSection() {
                     <Button variant="outline" size="lg">
                         View Demo
                     </Button>
-                </motion.div>
+                </div>
 
-                {/* Floating Stats / Cards */}
+                {/* Floating Stats / Cards - Can stay Framer Motion as they are below fold/secondary */}
                 <div className="mt-20 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6">
                     <StatsCard
                         icon={<Zap className="text-yellow-400" />}
@@ -71,14 +53,14 @@ export function HeroSection() {
                     />
                     <StatsCard
                         icon={<ShieldCheck className="text-green-400" />}
-                        title="Bank-Grade Security"
-                        desc="ISO 27001 Certified"
+                        title="Secure"
+                        desc="ISO 27001 Ready"
                         delay={0.5}
                     />
                     <StatsCard
                         icon={<Globe2 className="text-blue-400" />}
-                        title="Global Payments"
-                        desc="Crypto & Fiat Ready"
+                        title="Global"
+                        desc="Crypto & Fiat"
                         delay={0.6}
                     />
                 </div>
@@ -91,11 +73,12 @@ function StatsCard({ icon, title, desc, delay }: { icon: React.ReactNode, title:
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.5, delay }}
             className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-sm hover:bg-white/[0.04] transition-colors flex items-center gap-4"
         >
-            <div className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
+            <div className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
                 {icon}
             </div>
             <div className="text-left">
