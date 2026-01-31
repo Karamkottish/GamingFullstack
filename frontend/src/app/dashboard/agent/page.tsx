@@ -2,6 +2,7 @@
 import { Users, Wallet, CreditCard, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { UserGlobe } from "@/components/dashboard/UserGlobe"
 
 const data = [
     { name: 'Mon', revenue: 4000 },
@@ -88,30 +89,14 @@ export default function AgentDashboard() {
                     </div>
                 </div>
 
-                {/* Recent Users - Mini Table */}
-                <div className="lg:col-span-3 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-semibold text-white">Recent Users</h3>
-                        <button className="text-xs text-primary hover:underline">View All</button>
+                {/* Globe & Network Visualizer */}
+                <div className="lg:col-span-3 bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col">
+                    <div className="p-6 pb-0 z-10">
+                        <h3 className="text-lg font-semibold text-white">Live Network</h3>
+                        <p className="text-xs text-muted-foreground">Real-time active user sessions</p>
                     </div>
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-xs font-bold text-white">
-                                        JD
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-white">John Doe {i}</p>
-                                        <p className="text-xs text-muted-foreground">Joined 2h ago</p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-bold text-green-400">+$250</p>
-                                    <p className="text-xs text-muted-foreground">Deposited</p>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="flex-1 min-h-[300px]">
+                        <UserGlobe />
                     </div>
                 </div>
             </div>

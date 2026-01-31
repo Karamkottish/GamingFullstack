@@ -3,6 +3,9 @@ import { usePathname } from "next/navigation"
 import { Sidebar } from "@/components/layout/dashboard/Sidebar"
 import { DashboardHeader } from "@/components/layout/dashboard/DashboardHeader"
 
+import { Toaster } from "sonner"
+import { LiveActivityFeed } from "@/components/dashboard/LiveActivityFeed"
+
 export default function DashboardLayout({
     children,
 }: {
@@ -14,6 +17,9 @@ export default function DashboardLayout({
 
     return (
         <div className="min-h-screen bg-background text-foreground flex">
+            <LiveActivityFeed />
+            <Toaster position="bottom-right" theme="dark" />
+
             {/* Sidebar */}
             <Sidebar role={role} />
 
