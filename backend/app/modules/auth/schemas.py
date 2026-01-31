@@ -20,8 +20,9 @@ class UserLogin(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
-    user: dict  # Simplified user object
+    user: dict
 
 class UserResponse(UserBase):
     id: UUID
@@ -31,3 +32,9 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserAuthResponse(BaseModel):
+    user: UserResponse
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
