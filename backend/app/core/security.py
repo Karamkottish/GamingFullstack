@@ -3,17 +3,22 @@ from typing import Any, Union
 from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import get_settings
+import hashlib
 
 settings = get_settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # Pre-hash with SHA256 to handle any length password
+    prehashed = hashlib.sha256(plain_password.encode()).hexdigest()
+    return pwd_context.verify(prehashed, hashed_password)
 
 def get_password_hash(password: str) -> str:
-    # Bcrypt has a 72-byte limit. We enforce this in schemas, but adding a fail-safe here.
-    return pwd_context.hash(password[:72])
+    # Pre-hash with SHA256 to get fixed-length output, then bcrypt that
+    # This avoids bcrypt's 72-byte limit while maintaining security
+    prehashed = hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(prehashed)
 
 def create_access_token(subject: Union[str, Any], expires_delta: timedelta = None) -> str:
     if expires_delta:
