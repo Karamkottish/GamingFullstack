@@ -11,12 +11,15 @@ class Commission(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     agent_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    source_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True) # User who generated revenue
-    amount = Column(Numeric(18, 2), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True) # User who generated revenue (source user)
+    amount = Column(Numeric(18, 2), nullable=False, default=0)
+    revenue = Column(Numeric(18, 2), nullable=False, default=0) # Total revenue generated
+    commission_rate = Column(Numeric(5, 2), nullable=False, default=10) # Commission rate percentage
     type = Column(String, default="REVENUE_SHARE")
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     status = Column(String, default="PAID")
 
     # Relationships
     agent = relationship("User", foreign_keys=[agent_id], back_populates="commissions")
-    source_user = relationship("User", foreign_keys=[source_user_id])
+    source_user = relationship("User", foreign_keys=[user_id])

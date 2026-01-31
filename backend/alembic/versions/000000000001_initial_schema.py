@@ -97,15 +97,62 @@ def upgrade():
     CREATE TABLE IF NOT EXISTS commissions (
         id UUID NOT NULL, 
         agent_id UUID NOT NULL, 
-        source_user_id UUID, 
-        amount NUMERIC(18, 2) NOT NULL, 
+        user_id UUID, 
+        amount NUMERIC(18, 2) NOT NULL DEFAULT 0, 
+        revenue NUMERIC(18, 2) NOT NULL DEFAULT 0,
+        commission_rate NUMERIC(5, 2) NOT NULL DEFAULT 10,
         type VARCHAR, 
         created_at TIMESTAMP WITHOUT TIME ZONE, 
+        updated_at TIMESTAMP WITHOUT TIME ZONE,
         status VARCHAR, 
         PRIMARY KEY (id), 
         FOREIGN KEY(agent_id) REFERENCES users (id), 
-        FOREIGN KEY(source_user_id) REFERENCES users (id)
+        FOREIGN KEY(user_id) REFERENCES users (id)
     )
+    """)
+    
+    # Add new columns to commissions if they don't exist
+    op.execute("""
+    DO $$
+    BEGIN
+        -- Rename source_user_id to user_id if needed
+        IF EXISTS (SELECT 1 FROM information_schema.columns 
+                  WHERE table_name='commissions' AND column_name='source_user_id') 
+           AND NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='commissions' AND column_name='user_id') THEN
+            ALTER TABLE commissions RENAME COLUMN source_user_id TO user_id;
+        END IF;
+        
+        -- Add user_id if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='commissions' AND column_name='user_id') THEN
+            ALTER TABLE commissions ADD COLUMN user_id UUID REFERENCES users(id);
+        END IF;
+        
+        -- Add revenue column
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='commissions' AND column_name='revenue') THEN
+            ALTER TABLE commissions ADD COLUMN revenue NUMERIC(18, 2) NOT NULL DEFAULT 0;
+        END IF;
+        
+        -- Add commission_rate column
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='commissions' AND column_name='commission_rate') THEN
+            ALTER TABLE commissions ADD COLUMN commission_rate NUMERIC(5, 2) NOT NULL DEFAULT 10;
+        END IF;
+        
+        -- Add updated_at column
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='commissions' AND column_name='updated_at') THEN
+            ALTER TABLE commissions ADD COLUMN updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW();
+        END IF;
+    EXCEPTION
+        WHEN duplicate_column THEN
+            NULL;
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Error updating commissions table: %', SQLERRM;
+    END
+    $$;
     """)
 
     # AFFILIATE LINKS
