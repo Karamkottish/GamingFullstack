@@ -4,6 +4,8 @@ import uuid
 from datetime import datetime
 from app.core.database import Base
 
+from sqlalchemy.orm import relationship
+
 class Commission(Base):
     __tablename__ = "commissions"
 
@@ -14,3 +16,7 @@ class Commission(Base):
     type = Column(String, default="REVENUE_SHARE")
     created_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String, default="PAID")
+
+    # Relationships
+    agent = relationship("User", foreign_keys=[agent_id], back_populates="commissions")
+    source_user = relationship("User", foreign_keys=[source_user_id])

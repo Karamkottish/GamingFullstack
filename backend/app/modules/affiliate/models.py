@@ -4,6 +4,8 @@ import uuid
 from datetime import datetime
 from app.core.database import Base
 
+from sqlalchemy.orm import relationship
+
 class AffiliateLink(Base):
     __tablename__ = "affiliate_links"
     
@@ -14,6 +16,10 @@ class AffiliateLink(Base):
     campaign_name = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Relationships
+    user = relationship("User", back_populates="affiliate_links")
+    clicks = relationship("ClickEvent", back_populates="link")
+
 class ClickEvent(Base):
     __tablename__ = "click_events"
     
@@ -23,3 +29,6 @@ class ClickEvent(Base):
     geo_lat = Column(Float, nullable=True)
     geo_lng = Column(Float, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    link = relationship("AffiliateLink", back_populates="clicks")
