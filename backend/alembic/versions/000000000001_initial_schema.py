@@ -42,12 +42,24 @@ def upgrade():
     op.execute("""
     DO $$
     BEGIN
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='agent_id') THEN
-            ALTER TABLE users ADD COLUMN agent_id UUID REFERENCES users(id);
+        -- Add agent_id if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='users' AND column_name='agent_id') THEN
+            ALTER TABLE users ADD COLUMN agent_id UUID;
+            ALTER TABLE users ADD CONSTRAINT users_agent_id_fkey 
+                FOREIGN KEY(agent_id) REFERENCES users(id);
         END IF;
-        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='phone_number') THEN
+        
+        -- Add phone_number if missing
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                      WHERE table_name='users' AND column_name='phone_number') THEN
             ALTER TABLE users ADD COLUMN phone_number VARCHAR;
         END IF;
+    EXCEPTION
+        WHEN duplicate_column THEN
+            NULL; -- Column already exists, ignore
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Error adding columns: %', SQLERRM;
     END
     $$;
     """)
