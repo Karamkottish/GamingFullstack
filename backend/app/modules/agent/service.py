@@ -540,6 +540,7 @@ class AgentService:
                 id=t.id,
                 amount=abs(t.amount),
                 method=metadata.get('method', 'UNKNOWN'),
+                destination=metadata.get('wallet_address') or metadata.get('destination'),
                 status=t.status,
                 requested_at=t.created_at,
                 processed_at=t.updated_at if t.status != 'PENDING' else None,

@@ -103,6 +103,7 @@ class PayoutRecord(BaseModel):
     id: UUID
     amount: Decimal
     method: str
+    destination: Optional[str] = None
     status: str
     requested_at: datetime
     processed_at: Optional[datetime] = None
