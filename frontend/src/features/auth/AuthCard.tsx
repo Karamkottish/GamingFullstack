@@ -5,7 +5,9 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { Gamepad2, User, Users, ArrowRight, Mail, Lock, UserCircle } from "lucide-react"
+import { Gamepad2, User, Users, ArrowRight, Mail, Lock, UserCircle, Eye, EyeOff } from "lucide-react"
+import { AuthService, LoginPayload, RegisterPayload } from "@/services/auth.service"
+import { toast } from "sonner"
 
 type AuthMode = "login" | "register"
 type Role = "AGENT" | "AFFILIATE"
@@ -20,22 +22,66 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
 
+    // Password Visibility State
+    const [showLoginPass, setShowLoginPass] = useState(false)
+    const [showRegisterPass, setShowRegisterPass] = useState(false)
+
+    // Form State
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
+    const [telegram, setTelegram] = useState("")
+
     // Toggle mode triggers the flip
     const toggleMode = () => setMode(mode === "login" ? "register" : "login")
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
 
-        // Mock Login Delay then Redirect
-        setTimeout(() => {
-            setIsLoading(false)
-            if (role === "AGENT") {
-                router.push("/dashboard/agent")
+        try {
+            if (mode === "login") {
+                const payload: LoginPayload = { email, password }
+                const response = await AuthService.login(payload)
+
+                // Store token & role logic
+                localStorage.setItem('access_token', response.access_token)
+                localStorage.setItem('refresh_token', response.refresh_token)
+                localStorage.setItem('user_role', response.user.role)
+
+                toast.success(`Welcome back, ${response.user.first_name || 'User'}!`, {
+                    description: "Successfully logged in to your dashboard."
+                })
+
+                // Redirect based on role
+                const targetRole = response.user.role === 'AGENT' ? '/dashboard/agent' : '/dashboard/affiliate'
+                router.push(targetRole)
             } else {
-                router.push("/dashboard/affiliate")
+                const payload: RegisterPayload = {
+                    email,
+                    password,
+                    first_name: firstName,
+                    last_name: lastName,
+                    telegram_id: telegram,
+                    role: role // AGENT or AFFILIATE selected in UI
+                }
+                const response = await AuthService.register(payload)
+
+                toast.success("Account Created!", {
+                    description: "Please check your email to verify your account."
+                })
+
+                // Switch to login or auto-login
+                setMode("login")
             }
-        }, 1500)
+        } catch (error: any) {
+            // Error is handled globally by api-client interceptor usually, 
+            // but we can catch specific cases here if needed.
+            console.error("Auth Error:", error)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -61,7 +107,14 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" />
+                                    <Input
+                                        className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        type="email"
+                                        placeholder="name@company.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -71,7 +124,21 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 </div>
                                 <div className="relative group">
                                     <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="••••••••" />
+                                    <Input
+                                        className="pl-10 pr-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        type={showLoginPass ? "text" : "password"}
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowLoginPass(!showLoginPass)}
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-white transition-colors"
+                                    >
+                                        {showLoginPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
                                 </div>
                             </div>
 
@@ -95,11 +162,23 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">First Name</label>
-                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="John" />
+                                    <Input
+                                        className="bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        placeholder="John"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        required
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Last Name</label>
-                                    <Input className="bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="Doe" />
+                                    <Input
+                                        className="bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        placeholder="Doe"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
 
@@ -107,7 +186,14 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Work Email</label>
                                 <div className="relative group">
                                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="email" placeholder="name@company.com" />
+                                    <Input
+                                        className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        type="email"
+                                        placeholder="name@company.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
                                 </div>
                             </div>
 
@@ -115,7 +201,21 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Password</label>
                                 <div className="relative group">
                                     <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" type="password" placeholder="Create a strong password" />
+                                    <Input
+                                        className="pl-10 pr-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        type={showRegisterPass ? "text" : "password"}
+                                        placeholder="Create a strong password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowRegisterPass(!showRegisterPass)}
+                                        className="absolute right-3 top-2.5 text-muted-foreground hover:text-white transition-colors"
+                                    >
+                                        {showRegisterPass ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                    </button>
                                 </div>
                             </div>
 
@@ -124,7 +224,12 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Telegram ID</label>
                                 <div className="relative group">
                                     <UserCircle className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                                    <Input className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all" placeholder="@username" />
+                                    <Input
+                                        className="pl-10 bg-black/20 border-white/10 focus:border-primary/50 transition-all"
+                                        placeholder="@username"
+                                        value={telegram}
+                                        onChange={(e) => setTelegram(e.target.value)}
+                                    />
                                 </div>
                             </div>
 
@@ -197,6 +302,7 @@ function RoleSwitcher({ role, setRole }: { role: Role, setRole: (r: Role) => voi
             <button
                 onClick={() => setRole("AGENT")}
                 className={`relative z-10 flex items-center justify-center gap-2 text-sm font-semibold py-3 rounded-xl transition-colors ${role === "AGENT" ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                suppressHydrationWarning
             >
                 <User className="h-4 w-4" />
                 Agent
@@ -204,6 +310,7 @@ function RoleSwitcher({ role, setRole }: { role: Role, setRole: (r: Role) => voi
             <button
                 onClick={() => setRole("AFFILIATE")}
                 className={`relative z-10 flex items-center justify-center gap-2 text-sm font-medium py-3 rounded-xl transition-colors ${role === "AFFILIATE" ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                suppressHydrationWarning
             >
                 <Users className="h-4 w-4" />
                 Affiliate
