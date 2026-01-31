@@ -7,15 +7,11 @@ import { Input } from "@/components/ui/Input"
 import { UserService } from "@/services/user.service"
 import { User } from "@/services/auth.service"
 
+import { useProfile } from "@/hooks/useProfile"
+
 export function DashboardHeader({ role }: { role: string }) {
     const router = useRouter()
-    const [user, setUser] = useState<User | null>(null)
-
-    useEffect(() => {
-        UserService.getProfile()
-            .then(setUser)
-            .catch(() => { }) // Silent fail, user will see default
-    }, [])
+    const { data: user } = useProfile()
 
     const handleProfileClick = () => {
         const settingsPath = role === 'AGENT' ? '/dashboard/agent/settings' : '/dashboard/affiliate/settings'

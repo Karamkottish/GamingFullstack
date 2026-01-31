@@ -4,6 +4,7 @@ import './globals.css'
 import { cn } from '@/lib/utils'
 
 import { ThemeProvider } from "@/components/ui/ThemeProvider"
+import { AppProviders as Providers } from '@/lib/providers'
 
 
 const inter = Inter({
@@ -63,15 +64,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   )
 }
+

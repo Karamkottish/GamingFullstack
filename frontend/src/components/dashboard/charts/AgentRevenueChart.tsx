@@ -1,30 +1,15 @@
-"use client"
-import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { AgentService } from '@/services/agent.service'
+import { RevenueChartPoint } from '@/services/agent.service'
 
-export default function AgentRevenueChart() {
-    const [data, setData] = useState<any[]>([])
-    const [loading, setLoading] = useState(true)
+interface AgentRevenueChartProps {
+    data?: RevenueChartPoint[]
+    isLoading?: boolean
+}
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const revenueData = await AgentService.getRevenueAnalytics('7d')
-                setData(revenueData)
-            } catch (error) {
-                console.error('Failed to fetch revenue data:', error)
-                // Fallback to empty array on error
-                setData([])
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchData()
-    }, [])
+export default function AgentRevenueChart({ data = [], isLoading = false }: AgentRevenueChartProps) {
     return (
         <div className="h-[300px] w-full">
-            {loading ? (
+            {isLoading ? (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm animate-pulse">
                     Loading revenue data...
                 </div>

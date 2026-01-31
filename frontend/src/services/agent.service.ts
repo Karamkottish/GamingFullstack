@@ -2,10 +2,20 @@ import { api } from '@/lib/api-client'
 
 // Types for Agent Dashboard
 export interface AgentStats {
-    totalUsers: number
-    totalRevenue: number
-    pendingCommission: number
-    withdrawableBalance: number
+    total_users: number
+    active_users: number
+    total_revenue: number
+    total_commission: number
+    pending_commission: number
+    withdrawable_balance: number
+    this_month_revenue: number
+    this_month_commission: number
+}
+
+export interface RevenueChartPoint {
+    date: string
+    revenue: number
+    commission: number
 }
 
 export interface WalletBalance {
@@ -18,18 +28,38 @@ export interface WalletBalance {
 
 export interface UserTableItem {
     id: string
-    username: string
     email: string
+    full_name: string
     status: 'ACTIVE' | 'BLOCKED'
-    joinedAt: string
-    totalDeposited: number
-    lastActive: string
+    joined_at: string
+    total_deposited: number
+    total_wagered: number
+    last_active: string
 }
 
 export interface AddUserPayload {
-    username: string
     email: string
-    initialCredit: number
+    password?: string
+    first_name: string
+    last_name: string
+    telegram_id: string
+}
+
+export interface CommissionRecord {
+    id: string
+    user_id: string
+    user_name: string
+    amount: number
+    revenue_generated: number
+    commission_rate: number
+    date: string
+    status: 'PENDING' | 'PAID'
+}
+
+export interface PayoutRequest {
+    amount: number
+    method: 'BANK' | 'CRYPTO' | 'USDT'
+    wallet_address?: string
 }
 
 export const AgentService = {
@@ -40,7 +70,7 @@ export const AgentService = {
     },
 
     getRevenueAnalytics: async (range: string = '7d') => {
-        const response = await api.get<any[]>('/v1/agent/analytics/revenue', { range })
+        const response = await api.get<RevenueChartPoint[]>('/v1/agent/analytics/revenue', { params: { range } })
         return response.data
     },
 
@@ -50,34 +80,29 @@ export const AgentService = {
     },
 
     // User Management
-    getUsers: async (page = 1, limit = 10, search = '') => {
-        const response = await api.get<{ data: UserTableItem[], meta: any }>('/v1/agent/users', { page, limit, search })
+    getUsers: async (page = 1, page_size = 20, search = '') => {
+        const response = await api.get<{ data: UserTableItem[], total: number, page: number, page_size: number }>('/v1/agent/users', { params: { page, page_size, search } })
         return response.data
     },
 
     addUser: async (data: AddUserPayload) => {
-        const response = await api.post('/v1/agent/users', data)
+        const response = await api.post<UserTableItem>('/v1/agent/users', data)
         return response.data
     },
 
-    blockUser: async (userId: string) => {
-        const response = await api.post(`/v1/agent/users/${userId}/block`)
-        return response.data
-    },
-
-    unblockUser: async (userId: string) => {
-        const response = await api.post(`/v1/agent/users/${userId}/unblock`)
+    toggleUserStatus: async (userId: string) => {
+        const response = await api.patch<UserTableItem>(`/v1/agent/users/${userId}/status`)
         return response.data
     },
 
     // Commissions
-    getCommissions: async () => {
-        const response = await api.get<any[]>('/v1/agent/commissions')
+    getCommissions: async (page = 1, page_size = 20) => {
+        const response = await api.get<{ commissions: CommissionRecord[], total: number, total_amount: number }>('/v1/agent/commissions', { params: { page, page_size } })
         return response.data
     },
 
-    requestPayout: async (amount: number, method: string, walletAddress?: string) => {
-        const response = await api.post('/v1/agent/payouts/request', { amount, method, walletAddress })
+    requestPayout: async (data: PayoutRequest) => {
+        const response = await api.post('/v1/agent/payouts/request', data)
         return response.data
     }
 }
