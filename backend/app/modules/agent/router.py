@@ -241,3 +241,47 @@ async def get_payouts(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch payouts"
         )
+@router.post(
+    "/payouts/{payout_id}/approve",
+    response_model=schemas.PayoutRecord,
+    summary="Approve Payout (Admin Only Sim)",
+    description="Admin simulated endpoint to approve a payout request"
+)
+async def approve_payout(
+    payout_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Approve a payout request"""
+    try:
+        return await AgentService.approve_payout(db, payout_id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving payout: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to approve payout"
+        )
+
+@router.post(
+    "/payouts/{payout_id}/reject",
+    response_model=schemas.PayoutRecord,
+    summary="Reject Payout (Admin Only Sim)",
+    description="Admin simulated endpoint to reject a payout request with reason"
+)
+async def reject_payout(
+    payout_id: UUID,
+    reject_in: schemas.PayoutApprovalRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Reject a payout request"""
+    try:
+        return await AgentService.reject_payout(db, payout_id, reject_in.reason or "No reason provided")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error rejecting payout: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reject payout"
+        )

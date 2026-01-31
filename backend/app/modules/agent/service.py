@@ -551,3 +551,71 @@ class AgentService:
             payouts=payout_list,
             total=total
         )
+    @staticmethod
+    async def approve_payout(db: AsyncSession, payout_id: UUID) -> schemas.PayoutRecord:
+        """Approve a payout request (Admin simulation)"""
+        result = await db.execute(select(Transaction).where(Transaction.id == payout_id))
+        transaction = result.scalars().first()
+        
+        if not transaction or transaction.type != 'WITHDRAWAL':
+            raise HTTPException(status_code=404, detail="Payout request not found")
+        
+        if transaction.status != 'PENDING':
+            raise HTTPException(status_code=400, detail=f"Payout already {transaction.status}")
+        
+        transaction.status = 'PAID'
+        transaction.updated_at = datetime.utcnow()
+        await db.commit()
+        await db.refresh(transaction)
+        
+        metadata = transaction.metadata or {}
+        return schemas.PayoutRecord(
+            id=transaction.id,
+            amount=abs(transaction.amount),
+            method=metadata.get('method', 'UNKNOWN'),
+            destination=metadata.get('wallet_address') or metadata.get('destination'),
+            status=transaction.status,
+            requested_at=transaction.created_at,
+            processed_at=transaction.updated_at,
+            rejection_reason=None
+        )
+
+    @staticmethod
+    async def reject_payout(db: AsyncSession, payout_id: UUID, reason: str) -> schemas.PayoutRecord:
+        """Reject a payout request and refund balance (Admin simulation)"""
+        result = await db.execute(select(Transaction).where(Transaction.id == payout_id))
+        transaction = result.scalars().first()
+        
+        if not transaction or transaction.type != 'WITHDRAWAL':
+            raise HTTPException(status_code=404, detail="Payout request not found")
+        
+        if transaction.status != 'PENDING':
+            raise HTTPException(status_code=400, detail=f"Payout already {transaction.status}")
+        
+        # Get wallet to refund
+        wallet_result = await db.execute(select(Wallet).where(Wallet.id == transaction.wallet_id))
+        wallet = wallet_result.scalars().first()
+        
+        if wallet:
+            # Payouts were already deducted in request_payout
+            wallet.balance += abs(transaction.amount)
+            
+        transaction.status = 'REJECTED'
+        transaction.updated_at = datetime.utcnow()
+        metadata = (transaction.metadata or {}).copy()
+        metadata['rejection_reason'] = reason
+        transaction.metadata = metadata
+        
+        await db.commit()
+        await db.refresh(transaction)
+        
+        return schemas.PayoutRecord(
+            id=transaction.id,
+            amount=abs(transaction.amount),
+            method=metadata.get('method', 'UNKNOWN'),
+            destination=metadata.get('wallet_address') or metadata.get('destination'),
+            status=transaction.status,
+            requested_at=transaction.created_at,
+            processed_at=transaction.updated_at,
+            rejection_reason=reason
+        )

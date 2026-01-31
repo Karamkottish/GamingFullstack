@@ -115,3 +115,6 @@ class PayoutRecord(BaseModel):
 class PayoutsList(BaseModel):
     payouts: List[PayoutRecord]
     total: int
+
+class PayoutApprovalRequest(BaseModel):
+    reason: Optional[str] = None

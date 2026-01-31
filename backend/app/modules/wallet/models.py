@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, Numeric, DateTime, Enum as SqlEnum, Boolean
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 import uuid
@@ -35,6 +36,8 @@ class Transaction(Base):
     type = Column(SqlEnum(TransactionType), nullable=False)
     status = Column(String, default="PENDING") # PENDING, COMPLETED, FAILED
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    metadata = Column(postgresql.JSONB, nullable=True) # Store additional info like rejection reason, payment details
 
     # Relationships
     wallet = relationship("Wallet", back_populates="transactions")
