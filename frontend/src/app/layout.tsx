@@ -6,7 +6,11 @@ import { cn } from '@/lib/utils'
 import { ThemeProvider } from "@/components/ui/ThemeProvider"
 
 
-const inter = Inter({ subsets: ['latin'], display: 'swap' })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   title: 'NexusPlay | Enterprise iGaming Platform & White-label Casino Solution',
@@ -57,8 +61,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn(inter.className, "min-h-screen bg-background text-foreground selection:bg-primary/20")}>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <body className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

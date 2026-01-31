@@ -1,20 +1,19 @@
 "use client"
 import { MousePointer2, UserPlus, DollarSign, Copy, Download, Link as LinkIcon, Image } from "lucide-react"
-import { UserGlobe } from "@/components/dashboard/UserGlobe"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import dynamic from 'next/dynamic'
 
-const data = [
-    { name: 'Mon', clicks: 120, conversions: 10 },
-    { name: 'Tue', clicks: 150, conversions: 22 },
-    { name: 'Wed', clicks: 200, conversions: 35 },
-    { name: 'Thu', clicks: 180, conversions: 30 },
-    { name: 'Fri', clicks: 250, conversions: 45 },
-    { name: 'Sat', clicks: 300, conversions: 60 },
-    { name: 'Sun', clicks: 350, conversions: 75 },
-]
+const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(mod => mod.UserGlobe), {
+    ssr: false,
+    loading: () => <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs animate-pulse">Loading Live Traffic...</div>
+})
+
+const AffiliatePerformanceChart = dynamic(() => import('@/components/dashboard/charts/AffiliatePerformanceChart'), {
+    ssr: false,
+    loading: () => <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground text-xs animate-pulse bg-white/5 rounded-xl">Loading Chart...</div>
+})
 
 export default function AffiliateDashboard() {
     return (
@@ -24,8 +23,8 @@ export default function AffiliateDashboard() {
                 <p className="text-muted-foreground">Track your campaigns and manage your referral assets.</p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Stats Grid - 4K Optimized */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4">
                 <StatsCard
                     title="Total Clicks"
                     value="12,543"
@@ -52,35 +51,11 @@ export default function AffiliateDashboard() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
                 {/* Conversion Chart */}
-                <div className="lg:col-span-2 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="lg:col-span-2 2xl:col-span-3 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
                     <h3 className="text-lg font-semibold text-white mb-6">Campaign Performance</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={data}>
-                                <defs>
-                                    <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                    </linearGradient>
-                                    <linearGradient id="colorConv" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <RechartsTooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff' }}
-                                />
-                                <Area type="monotone" dataKey="clicks" stroke="#3b82f6" fillOpacity={1} fill="url(#colorClicks)" />
-                                <Area type="monotone" dataKey="conversions" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorConv)" />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <AffiliatePerformanceChart />
                 </div>
 
                 {/* Right Column: Globe & Quick Link */}

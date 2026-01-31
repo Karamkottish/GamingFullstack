@@ -1,18 +1,17 @@
 "use client"
-import { Users, Wallet, CreditCard, TrendingUp } from "lucide-react"
+import { Users, Wallet, TrendingUp } from "lucide-react"
 import { Card } from "@/components/ui/Card"
-import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { UserGlobe } from "@/components/dashboard/UserGlobe"
+import dynamic from 'next/dynamic'
 
-const data = [
-    { name: 'Mon', revenue: 4000 },
-    { name: 'Tue', revenue: 3000 },
-    { name: 'Wed', revenue: 2000 },
-    { name: 'Thu', revenue: 2780 },
-    { name: 'Fri', revenue: 1890 },
-    { name: 'Sat', revenue: 2390 },
-    { name: 'Sun', revenue: 3490 },
-]
+const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(mod => mod.UserGlobe), {
+    ssr: false,
+    loading: () => <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs animate-pulse">Loading Globe...</div>
+})
+
+const AgentRevenueChart = dynamic(() => import('@/components/dashboard/charts/AgentRevenueChart'), {
+    ssr: false,
+    loading: () => <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground text-xs animate-pulse bg-white/5 rounded-xl">Loading Chart...</div>
+})
 
 export default function AgentDashboard() {
     return (
@@ -22,8 +21,8 @@ export default function AgentDashboard() {
                 <p className="text-muted-foreground">Overview of your network performance and commission status.</p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Stats Grid - 4K Optimized */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4">
                 <StatsCard
                     title="Total Users"
                     value="1,234"
@@ -50,47 +49,15 @@ export default function AgentDashboard() {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-7 2xl:grid-cols-8 gap-8">
                 {/* Revenue Chart */}
-                <div className="lg:col-span-4 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                <div className="lg:col-span-4 2xl:col-span-5 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
                     <h3 className="text-lg font-semibold text-white mb-6">Revenue Overview (7 Days)</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#888888"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => `$${value}`}
-                                />
-                                <RechartsTooltip
-                                    contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                                    itemStyle={{ color: '#fff' }}
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                                />
-                                <Bar
-                                    dataKey="revenue"
-                                    fill="currentColor"
-                                    radius={[4, 4, 0, 0]}
-                                    className="fill-primary"
-                                    barSize={40}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <AgentRevenueChart />
                 </div>
 
                 {/* Globe & Network Visualizer */}
-                <div className="lg:col-span-3 bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col">
+                <div className="lg:col-span-3 2xl:col-span-3 bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col min-h-[400px]">
                     <div className="p-6 pb-0 z-10">
                         <h3 className="text-lg font-semibold text-white">Live Network</h3>
                         <p className="text-xs text-muted-foreground">Real-time active user sessions</p>

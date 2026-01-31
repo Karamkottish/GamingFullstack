@@ -9,6 +9,9 @@ const config: Config = {
         "./src/features/**/*.{js,ts,jsx,tsx,mdx}",
     ],
     theme: {
+        fontFamily: {
+            sans: ["var(--font-inter)", "sans-serif"],
+        },
         container: {
             center: true,
             padding: "2rem",

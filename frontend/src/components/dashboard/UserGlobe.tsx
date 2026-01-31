@@ -11,14 +11,14 @@ export function UserGlobe() {
         if (!canvasRef.current) return
 
         const globe = createGlobe(canvasRef.current, {
-            devicePixelRatio: 2,
-            width: 600 * 2,
-            height: 600 * 2,
+            devicePixelRatio: 1.5, // Reduced from 2 for better performance
+            width: 600 * 1.5,
+            height: 600 * 1.5,
             phi: 0,
             theta: 0,
             dark: 1,
             diffuse: 1.2,
-            mapSamples: 16000,
+            mapSamples: 10000, // Reduced from 16000
             mapBrightness: 6,
             baseColor: [0.1, 0.1, 0.1], // Dark gray base
             markerColor: [0.5, 0.2, 0.9], // Violet markers
@@ -36,7 +36,7 @@ export function UserGlobe() {
                 // Called on every animation frame.
                 // `state` will be an empty object, return updated params.
                 state.phi = phi
-                phi += 0.01
+                phi += 0.005 // Slower rotation for less visual noise
             },
         })
 
@@ -46,11 +46,19 @@ export function UserGlobe() {
     }, [])
 
     return (
-        <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
-            <canvas
-                ref={canvasRef}
-                style={{ width: 600, height: 600, maxWidth: "100%", aspectRatio: 1 }}
-            />
+        <div className="w-full h-full flex items-center justify-center relative overflow-hidden group">
+            {/* Desktop Globe - Hidden on Mobile for Performance */}
+            <div className="hidden md:block w-full h-full">
+                <canvas
+                    ref={canvasRef}
+                    style={{ width: 600, height: 600, maxWidth: "100%", aspectRatio: 1 }}
+                    className="opacity-80 transition-opacity duration-300 group-hover:opacity-100"
+                />
+            </div>
+
+            {/* Mobile Fallback - Static Abstract Circle for near-zero impact */}
+            <div className="md:hidden w-[300px] h-[300px] rounded-full bg-gradient-to-tr from-primary/20 to-blue-600/5 blur-3xl animate-pulse" />
+
             <div className="absolute bottom-4 left-4 pointer-events-none">
                 <div className="flex items-center gap-2">
                     <span className="relative flex h-3 w-3">

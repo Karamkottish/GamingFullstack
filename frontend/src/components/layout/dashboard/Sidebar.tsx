@@ -37,7 +37,7 @@ export function Sidebar({ role }: { role: Role }) {
     const links = role === "AGENT" ? agentLinks : affiliateLinks
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-black/60 backdrop-blur-xl border-r border-white/10 z-50 flex flex-col">
+        <aside className="h-full w-full bg-black/60 backdrop-blur-xl border-r border-white/10 flex flex-col">
             <div className="p-6">
                 <Link href="/" className="flex items-center gap-3 group">
                     <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
