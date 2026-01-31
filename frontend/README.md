@@ -114,4 +114,3 @@ CREATE TABLE commissions (
 
 ---
 
-*Verified & optimized for 2027 Standards.*
