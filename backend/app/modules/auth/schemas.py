@@ -5,7 +5,9 @@ from app.modules.auth.models import UserRole
 
 class UserBase(BaseModel):
     email: EmailStr
-    full_name: Optional[str] = None
+    first_name: str
+    last_name: str
+    telegram_id: Optional[str] = None
 
 class UserCreate(UserBase):
     password: str
@@ -25,6 +27,7 @@ class UserResponse(UserBase):
     id: UUID
     role: UserRole
     is_active: bool
+    full_name: Optional[str] = None
 
     class Config:
         from_attributes = True

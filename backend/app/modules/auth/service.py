@@ -25,7 +25,9 @@ class AuthService:
             email=user_in.email,
             hashed_password=get_password_hash(user_in.password),
             role=user_in.role,
-            full_name=user_in.full_name
+            first_name=user_in.first_name,
+            last_name=user_in.last_name,
+            telegram_id=user_in.telegram_id
         )
         db.add(db_user)
         await db.flush() # To get ID
