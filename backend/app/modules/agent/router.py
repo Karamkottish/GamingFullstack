@@ -286,22 +286,6 @@ async def reject_payout(
             detail="Failed to reject payout"
         )
 
-@router.post("/payouts/{payout_id}/approve", response_model=schemas.PayoutRecord)
-async def approve_payout(
-    payout_id: UUID,
-    db: AsyncSession = Depends(get_db)
-):
-    """Approve a payout request (Admin simulation)"""
-    return await AgentService.approve_payout(db, payout_id)
-
-@router.post("/payouts/{payout_id}/reject", response_model=schemas.PayoutRecord)
-async def reject_payout(
-    payout_id: UUID,
-    payout_in: schemas.PayoutApprovalRequest,
-    db: AsyncSession = Depends(get_db)
-):
-    """Reject a payout request (Admin simulation)"""
-    return await AgentService.reject_payout(db, payout_id, payout_in.reason or "Rejected by administrator")
 @router.post("/testing/seed-wallet")
 async def seed_wallet(
     amount: float = Query(5000.0, ge=0),

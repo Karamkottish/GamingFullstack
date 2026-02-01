@@ -329,9 +329,6 @@ class AgentService:
         except:
             pending_commission = Decimal("0")
         
-        # Get total earned (Robust Lifetime Earnings: Balance + Pending + Withdrawn)
-        total_earned = wallet.balance + total_payouts + pending_payouts
-        
         # Get total withdrawn (PAID status)
         try:
             withdrawn_result = await db.execute(
@@ -361,6 +358,9 @@ class AgentService:
             pending_payouts = abs(pending_payouts_result.scalar() or Decimal("0"))
         except:
             pending_payouts = Decimal("0")
+        
+        # Get total earned (Robust Lifetime Earnings: Balance + Pending + Withdrawn)
+        total_earned = wallet.balance + total_withdrawn + pending_payouts
         
         return schemas.WalletBalance(
             commission_balance=wallet.balance,
