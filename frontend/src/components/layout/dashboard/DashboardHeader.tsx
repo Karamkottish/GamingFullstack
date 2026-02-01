@@ -10,8 +10,15 @@ import { User } from "@/services/auth.service"
 import { useProfile } from "@/hooks/useProfile"
 
 export function DashboardHeader({ role }: { role: string }) {
+    const [hasMounted, setHasMounted] = useState(false)
     const router = useRouter()
     const { data: user } = useProfile()
+
+    useEffect(() => {
+        setHasMounted(true)
+    }, [])
+
+    if (!hasMounted) return <div className="h-16 border-b border-white/10 bg-black/60 sticky top-0 z-40" />
 
     const handleProfileClick = () => {
         const settingsPath = role === 'AGENT' ? '/dashboard/agent/settings' : '/dashboard/affiliate/settings'

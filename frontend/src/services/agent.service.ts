@@ -7,6 +7,8 @@ export interface AgentStats {
     total_revenue: number
     total_commission: number
     pending_commission: number
+    total_payouts: number
+    pending_payouts: number
     withdrawable_balance: number
     this_month_revenue: number
     this_month_commission: number
@@ -21,6 +23,7 @@ export interface RevenueChartPoint {
 export interface WalletBalance {
     commission_balance: number
     pending_commission: number
+    pending_payouts: number
     total_withdrawn: number
     total_earned: number
     currency: string

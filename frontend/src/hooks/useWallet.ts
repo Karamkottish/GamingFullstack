@@ -22,20 +22,6 @@ export function useWallet() {
         enabled: isAgent, // Only fetch if user is AGENT
         staleTime: 1000 * 60 * 2, // 2 minutes (wallet data should be fresh)
         retry: 2,
-        select: (data) => {
-            if (typeof window !== 'undefined') {
-                const seed = localStorage.getItem('test_wallet_seed')
-                if (seed) {
-                    const amount = parseFloat(seed)
-                    return {
-                        ...data,
-                        commission_balance: data.commission_balance + amount,
-                        total_earned: data.total_earned + amount
-                    }
-                }
-            }
-            return data
-        }
     })
 }
 

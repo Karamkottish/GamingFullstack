@@ -101,7 +101,7 @@ export function WithdrawalsPage() {
                             <div className="mt-6 w-full grid grid-cols-2 gap-4 border-t border-white/10 pt-6">
                                 <div className="text-left">
                                     <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Pending</p>
-                                    <p className="text-lg font-black text-white">${wallet?.pending_commission?.toLocaleString() || "0"}</p>
+                                    <p className="text-lg font-black text-white">${wallet?.pending_payouts?.toLocaleString() || "0"}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Withdrawn</p>

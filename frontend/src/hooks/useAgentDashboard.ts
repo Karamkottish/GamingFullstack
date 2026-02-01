@@ -30,20 +30,6 @@ export function useAgentStats() {
         queryKey: dashboardKeys.stats(),
         queryFn: AgentService.getStats,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        select: (data) => {
-            if (typeof window !== 'undefined') {
-                const seed = localStorage.getItem('test_wallet_seed')
-                if (seed) {
-                    const amount = parseFloat(seed)
-                    return {
-                        ...data,
-                        total_commission: data.total_commission + amount,
-                        withdrawable_balance: data.withdrawable_balance + amount
-                    }
-                }
-            }
-            return data
-        }
     })
 }
 
@@ -109,6 +95,7 @@ export function useApprovePayout() {
         mutationFn: (payoutId: string) => AgentService.approvePayout(payoutId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: payoutKeys.all })
+            queryClient.invalidateQueries({ queryKey: ['wallet'] })
             queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() })
             toast.success('Payout approved (Simulated Admin Action)')
         },
@@ -142,8 +129,10 @@ export function useSeedWallet() {
     return useMutation({
         mutationFn: (amount: number) => AgentService.seedWallet(amount),
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: payoutKeys.all })
             queryClient.invalidateQueries({ queryKey: ['agent', 'wallet'] })
             queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() })
+            queryClient.invalidateQueries({ queryKey: ['commissions'] })
             toast.success('Wallet seeded successfully! (Test Mode)')
         },
         onError: (err: any) => {

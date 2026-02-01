@@ -80,14 +80,6 @@ export function AuthCard({ initialMode = "login" }: AuthCardProps) {
                     description: `Welcome, ${response.user.first_name}! Redirecting to your dashboard...`
                 })
 
-                // SEEDING LOGIC: Generate random amount for testing (Frontend-only)
-                const randomSeed = Math.floor(1000 + Math.random() * 9000);
-                localStorage.setItem('test_wallet_seed', randomSeed.toString());
-
-                toast.info(`Test Mode: Frontend seeded with $${randomSeed.toLocaleString()}`, {
-                    icon: "💰"
-                });
-
                 // Auto-redirect to dashboard based on role
                 const targetRole = response.user.role === 'AGENT' ? '/dashboard/agent' : '/dashboard/affiliate'
                 setTimeout(() => router.push(targetRole), 1500)

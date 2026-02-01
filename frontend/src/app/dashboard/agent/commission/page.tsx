@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Download, Calendar, DollarSign, Filter, RefreshCcw, History, TrendingUp, Wallet, ArrowUpRight, CheckCircle2, AlertCircle, Clock, ChevronLeft, ChevronRight, Landmark, Percent } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Card } from "@/components/ui/Card"
@@ -14,10 +14,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import toast from "react-hot-toast"
 
 export default function AgentCommissionPage() {
+    const [hasMounted, setHasMounted] = useState(false)
     const [page, setPage] = useState(1)
     const [pageSize] = useState(20)
     const [isPayoutOpen, setIsPayoutOpen] = useState(false)
     const [activeTab, setActiveTab] = useState<'COMMISSIONS' | 'PAYOUTS'>('COMMISSIONS')
+
+    useEffect(() => {
+        setHasMounted(true)
+    }, [])
 
     // Payout form state
     const [payoutAmount, setPayoutAmount] = useState("")
@@ -112,6 +117,8 @@ export default function AgentCommissionPage() {
             </div>
         )
     }
+
+    if (!hasMounted) return null
 
     return (
         <ErrorBoundary>
