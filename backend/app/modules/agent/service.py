@@ -462,11 +462,14 @@ class AgentService:
             wallet_id=wallet.id,
             type='WITHDRAWAL',
             amount=-payout_in.amount,  # Negative for withdrawal
-            balance_before=wallet.balance,
-            balance_after=wallet.balance - payout_in.amount,
-            description=f"Withdrawal request via {payout_in.method}",
             status='PENDING',
-            tx_metadata={"method": payout_in.method, "wallet_address": payout_in.wallet_address}
+            tx_metadata={
+                "method": payout_in.method,
+                "wallet_address": payout_in.wallet_address,
+                "balance_before": str(wallet.balance),
+                "balance_after": str(wallet.balance - payout_in.amount),
+                "description": f"Withdrawal request via {payout_in.method}"
+            }
         )
         
         db.add(transaction)
@@ -637,10 +640,12 @@ class AgentService:
             wallet_id=wallet.id,
             type='DEPOSIT',
             amount=Decimal(str(amount)),
-            balance_before=wallet.balance - Decimal(str(amount)),
-            balance_after=wallet.balance,
-            description="Test Seed Balance",
-            status='COMPLETED'
+            status='COMPLETED',
+            tx_metadata={
+                "balance_before": str(wallet.balance - Decimal(str(amount))),
+                "balance_after": str(wallet.balance),
+                "description": "Test Seed Balance"
+            }
         )
         db.add(transaction)
         

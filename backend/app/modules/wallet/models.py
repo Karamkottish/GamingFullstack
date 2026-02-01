@@ -41,3 +41,18 @@ class Transaction(Base):
 
     # Relationships
     wallet = relationship("Wallet", back_populates="transactions")
+
+    @property
+    def balance_before(self) -> Decimal:
+        if not self.tx_metadata: return Decimal("0")
+        return Decimal(str(self.tx_metadata.get("balance_before", "0")))
+
+    @property
+    def balance_after(self) -> Decimal:
+        if not self.tx_metadata: return Decimal("0")
+        return Decimal(str(self.tx_metadata.get("balance_after", "0")))
+
+    @property
+    def description(self) -> str | None:
+        if not self.tx_metadata: return None
+        return self.tx_metadata.get("description")

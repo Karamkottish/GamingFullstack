@@ -305,7 +305,7 @@ async def reject_payout(
 @router.post("/testing/seed-wallet")
 async def seed_wallet(
     amount: float = Query(5000.0, ge=0),
-    current_user: User = Depends(get_current_active_role(UserRole.AGENT)),
+    current_user: User = Depends(get_current_agent),
     db: AsyncSession = Depends(get_db)
 ):
     """Seed real wallet balance for testing withdrawals."""
