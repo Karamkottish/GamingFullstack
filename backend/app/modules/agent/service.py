@@ -674,31 +674,81 @@ class AgentService:
 
     @staticmethod
     async def seed_wallet(db: AsyncSession, agent_id: UUID, amount: float) -> dict:
-        """Add real money to agent wallet for testing purposes."""
-        wallet_result = await db.execute(select(Wallet).where(Wallet.user_id == agent_id))
-        wallet = wallet_result.scalars().first()
+        """
+        Add real money to agent wallet and create sample commission history for testing.
+        Ensures Financial Hub looks populated for demonstration.
+        """
+        # 1. Get/Create wallet with lock
+        result = await db.execute(
+            select(Wallet)
+            .where(Wallet.user_id == agent_id)
+            .with_for_update()
+        )
+        wallet = result.scalars().first()
         
         if not wallet:
             wallet = Wallet(user_id=agent_id, balance=Decimal("0"))
             db.add(wallet)
+            await db.flush()
             
-        wallet.balance += Decimal(str(amount))
+        balance_before = wallet.balance
+        amt_decimal = Decimal(str(amount))
+        wallet.balance += amt_decimal
         
-        # Add a mock transaction for history
+        # 2. Add a primary mock transaction for history
         transaction = Transaction(
             wallet_id=wallet.id,
             type='DEPOSIT',
-            amount=Decimal(str(amount)),
+            amount=amt_decimal,
             status='COMPLETED',
             tx_metadata={
-                "balance_before": str(wallet.balance - Decimal(str(amount))),
+                "balance_before": str(balance_before),
                 "balance_after": str(wallet.balance),
-                "description": "Test Seed Balance"
+                "description": "Test Seed Balance",
+                "test_seed": True
             }
         )
         db.add(transaction)
+
+        # 3. Create Sample Commission history (to populate Financial Hub)
+        # We'll split the amount into 3 mock commissions from fake "players"
+        mock_players = ["JaneDoe", "Winner99", "AlexK"]
+        chunk_amt = amt_decimal / 3
+
+        # Find or create a dummy user to act as source for these commissions
+        dummy_user_result = await db.execute(
+            select(User).where(User.email == "system_mock_user@nexusplay.test")
+        )
+        dummy_user = dummy_user_result.scalars().first()
+        
+        if not dummy_user:
+            dummy_user = User(
+                email="system_mock_user@nexusplay.test",
+                hashed_password="---", # Not usable for login
+                first_name="Simulation",
+                last_name="Actor",
+                role=UserRole.USER,
+                is_active=True
+            )
+            db.add(dummy_user)
+            await db.flush()
+
+        for i, player_name in enumerate(mock_players):
+            commission = Commission(
+                agent_id=agent_id,
+                user_id=dummy_user.id, # Link to our simulation actor
+                amount=chunk_amt,
+                type="REVENUE_SHARE",
+                status="PAID",
+                created_at=datetime.utcnow() - timedelta(hours=(i+1)*2),
+            )
+            db.add(commission)
         
         await db.commit()
         await db.refresh(wallet)
         
-        return {"status": "success", "new_balance": float(wallet.balance)}
+        return {
+            "status": "success", 
+            "new_balance": float(wallet.balance),
+            "message": f"Seeded ${amount} and generated sample commission history."
+        }
