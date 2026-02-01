@@ -26,10 +26,10 @@ def upgrade():
             ALTER TABLE transactions ADD COLUMN updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW();
         END IF;
         
-        -- Add tx_metadata if missing
+        -- Add metadata if missing
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                      WHERE table_name='transactions' AND column_name='tx_metadata') THEN
-            ALTER TABLE transactions ADD COLUMN tx_metadata JSONB;
+                      WHERE table_name='transactions' AND column_name='metadata') THEN
+            ALTER TABLE transactions ADD COLUMN metadata JSONB;
         END IF;
     EXCEPTION
         WHEN OTHERS THEN
@@ -39,5 +39,5 @@ def upgrade():
     """)
 
 def downgrade():
-    op.drop_column('transactions', 'tx_metadata')
+    op.drop_column('transactions', 'metadata')
     op.drop_column('transactions', 'updated_at')
