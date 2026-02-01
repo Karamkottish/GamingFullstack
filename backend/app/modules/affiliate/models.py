@@ -44,7 +44,7 @@ class Conversion(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     link_id = Column(UUID(as_uuid=True), ForeignKey("affiliate_links.id"), nullable=False, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, unique=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True, index=True)
     conversion_type = Column(String, nullable=False)  # 'REGISTRATION' or 'FIRST_DEPOSIT'
     amount = Column(Numeric(18, 2), nullable=True)  # Deposit amount if FTD
     commission_earned = Column(Numeric(18, 2), default=Decimal("0"))  # CPA or RevShare
