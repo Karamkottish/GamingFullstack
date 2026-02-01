@@ -286,39 +286,27 @@ async def reject_payout(
             detail="Failed to reject payout"
         )
 
-@router.post(
-    "/testing/seed-wallet",
-    response_model=schemas.WalletSeedResponse,
-    summary="Seed Wallet Balance (Testing)",
-    description="""
-    Seed agent wallet with real balance for testing withdrawal flow.
-    
-    **Features**:
-    - Adds specified amount to wallet balance
-    - Creates 'DEPOSIT' transaction for history
-    - Handles wallet creation if missing
-    - Thread-safe using database locks
-    
-    **Authentication**: Requires AGENT or ADMIN role.
-    """,
-    responses={
-        200: {"description": "Wallet successfully seeded"},
-        403: {"description": "Access denied - Agent/Admin only"},
-        500: {"description": "Internal server error"}
-    }
-)
+@router.post("/payouts/{payout_id}/approve", response_model=schemas.PayoutRecord)
+async def approve_payout(
+    payout_id: UUID,
+    db: AsyncSession = Depends(get_db)
+):
+    """Approve a payout request (Admin simulation)"""
+    return await AgentService.approve_payout(db, payout_id)
+
+@router.post("/payouts/{payout_id}/reject", response_model=schemas.PayoutRecord)
+async def reject_payout(
+    payout_id: UUID,
+    payout_in: schemas.PayoutApprovalRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Reject a payout request (Admin simulation)"""
+    return await AgentService.reject_payout(db, payout_id, payout_in.reason or "Rejected by administrator")
+@router.post("/testing/seed-wallet")
 async def seed_wallet(
-    seed_data: schemas.WalletSeedRequest,
-    current_user: User = Depends(get_current_agent),
+    amount: float = Query(5000.0, ge=0),
+    current_user: User = Depends(get_current_active_role(UserRole.AGENT)),
     db: AsyncSession = Depends(get_db)
 ):
     """Seed real wallet balance for testing withdrawals."""
-    try:
-        return await AgentService.seed_wallet(db, current_user.id, seed_data.amount)
-    except Exception as e:
-        logger.error(f"Error seeding wallet: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to seed wallet: {str(e)}"
-        )
-
+    return await AgentService.seed_wallet(db, current_user.id, amount)
