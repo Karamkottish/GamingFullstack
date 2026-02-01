@@ -24,7 +24,7 @@ const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(
 const AgentRevenueChart = dynamic<any>(() => import('@/components/dashboard/charts/AgentRevenueChart'), {
     ssr: false,
     loading: () => (
-        <div className="w-full h-[300px] flex flex-col justify-end p-6 space-y-4 bg-white/5 rounded-2xl border border-white/5">
+        <div className="w-full h-[300px] flex flex-col justify-end p-6 space-y-4 bg-muted/20 rounded-2xl border border-border/5">
             <div className="flex items-end gap-2 h-40">
                 {Array.from({ length: 12 }).map((_, i) => (
                     <Skeleton key={i} width="100%" height={`${Math.random() * 100}%`} className="rounded-t-md" />
@@ -45,12 +45,12 @@ export default function AgentDashboard() {
 
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 bg-red-500/5 rounded-3xl border border-red-500/10 p-12">
-                <div className="p-4 bg-red-500/10 rounded-full">
-                    <AlertCircle className="h-12 w-12 text-red-500" />
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-6 bg-destructive/5 rounded-3xl border border-destructive/10 p-12">
+                <div className="p-4 bg-destructive/10 rounded-full">
+                    <AlertCircle className="h-12 w-12 text-destructive" />
                 </div>
                 <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-white">Dashboard Unavailable</h3>
+                    <h3 className="text-2xl font-bold text-foreground">Dashboard Unavailable</h3>
                     <p className="text-muted-foreground max-w-sm mx-auto">
                         We encountered an issue while fetching your network statistics. Please check your connection or try again.
                     </p>
@@ -71,7 +71,7 @@ export default function AgentDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex flex-col gap-2"
                 >
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-foreground bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">
                         Agent Overview
                     </h1>
                     <p className="text-muted-foreground text-sm md:text-base max-w-2xl">
@@ -121,17 +121,17 @@ export default function AgentDashboard() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="lg:col-span-4 2xl:col-span-5 bg-black/40 border border-white/10 rounded-3xl p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl"
+                        className="lg:col-span-4 2xl:col-span-5 glass-panel rounded-3xl p-8 relative overflow-hidden group shadow-2xl"
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
                         <div className="relative z-10">
                             <div className="flex items-center justify-between mb-8">
                                 <div>
-                                    <h3 className="text-xl font-black text-white">Revenue Analytics</h3>
+                                    <h3 className="text-xl font-black text-foreground">Revenue Analytics</h3>
                                     <p className="text-xs text-indigo-400/60 font-medium tracking-wide uppercase">PAST 7 DAYS PERFORMANCE</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white uppercase tracking-widest">Live Updates</span>
+                                    <span className="px-3 py-1 bg-muted/50 border border-border/50 rounded-lg text-[10px] font-bold text-foreground uppercase tracking-widest">Live Updates</span>
                                 </div>
                             </div>
                             <AgentRevenueChart data={analytics} isLoading={isChartLoading} />
@@ -143,27 +143,27 @@ export default function AgentDashboard() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="lg:col-span-3 2xl:col-span-3 bg-black/40 border border-white/10 rounded-3xl backdrop-blur-xl relative overflow-hidden flex flex-col min-h-[450px] shadow-2xl group"
+                        className="lg:col-span-3 2xl:col-span-3 glass-panel rounded-3xl relative overflow-hidden flex flex-col min-h-[450px] shadow-2xl group"
                     >
                         <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-transparent pointer-events-none" />
                         <div className="p-8 pb-0 z-10">
                             <div className="flex items-center gap-3">
                                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                                <h3 className="text-xl font-black text-white">Global Reach</h3>
+                                <h3 className="text-xl font-black text-foreground">Global Reach</h3>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-widest font-bold opacity-60">Real-time Network Footprint</p>
                         </div>
                         <div className="flex-1 relative">
                             <UserGlobe />
-                            <div className="absolute bottom-6 left-6 right-6 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                            <div className="absolute bottom-6 left-6 right-6 p-4 bg-muted/50 border border-border/50 rounded-2xl backdrop-blur-md">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Active nodes</p>
-                                        <p className="text-lg font-black text-white">{stats?.active_users || 0}</p>
+                                        <p className="text-lg font-black text-foreground">{stats?.active_users || 0}</p>
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Retention</p>
-                                        <p className="text-lg font-black text-white">88%</p>
+                                        <p className="text-lg font-black text-foreground">88%</p>
                                     </div>
                                 </div>
                             </div>
@@ -179,32 +179,32 @@ function StatsCard({ title, value, subValue, icon, isLoading, gradient }: { titl
     return (
         <motion.div
             whileHover={{ y: -4, scale: 1.02 }}
-            className="p-[1px] rounded-3xl bg-gradient-to-br from-white/10 to-white/5 group transition-all"
+            className="p-[1px] rounded-3xl bg-gradient-to-br from-border/20 to-border/5 group transition-all"
         >
-            <Card className={`h-full p-8 bg-black/40 border-none rounded-[23px] backdrop-blur-xl relative overflow-hidden flex flex-col justify-between shadow-xl`}>
+            <Card className={`h-full p-8 glass-panel border-none rounded-[23px] relative overflow-hidden flex flex-col justify-between shadow-xl`}>
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} blur-3xl rounded-full opacity-60 pointer-events-none group-hover:scale-150 transition-transform duration-500`} />
 
                 <div className="relative z-10">
                     <div className="flex items-center justify-between mb-6">
-                        <div className="p-3 bg-white/5 border border-white/10 rounded-2xl group-hover:bg-primary/20 group-hover:border-primary/30 transition-all shadow-inner">
+                        <div className="p-3 bg-muted/50 border border-border/50 rounded-2xl group-hover:bg-primary/20 group-hover:border-primary/30 transition-all shadow-inner">
                             {icon}
                         </div>
-                        <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black text-emerald-400 uppercase tracking-tighter">
+                        <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[10px] font-black text-emerald-500 uppercase tracking-tighter">
                             +12%
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] group-hover:text-white/60 transition-colors">
+                        <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] group-hover:text-foreground/60 transition-colors">
                             {title}
                         </h3>
-                        <div className="text-3xl font-black text-white tracking-tight">
+                        <div className="text-3xl font-black text-foreground tracking-tight">
                             {isLoading ? <Skeleton width="120px" height="32px" className="mt-2" /> : value}
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-white/5 relative z-10">
+                <div className="mt-6 pt-4 border-t border-border/10 relative z-10">
                     <div className="text-[11px] text-muted-foreground font-medium flex items-center gap-2">
                         {isLoading ? <Skeleton width="80px" height="10px" /> : (
                             <>

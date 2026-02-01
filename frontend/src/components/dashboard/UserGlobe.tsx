@@ -1,30 +1,34 @@
 "use client"
 import createGlobe from "cobe"
 import { useEffect, useRef } from "react"
+import { useTheme } from "@/contexts/ThemeContext"
 
 export function UserGlobe() {
     const canvasRef = useRef<HTMLCanvasElement>(null)
+    const { theme } = useTheme()
 
     useEffect(() => {
         let phi = 0
 
         if (!canvasRef.current) return
 
+        const isDark = theme === 'dark'
+
         const globe = createGlobe(canvasRef.current, {
-            devicePixelRatio: 1.5, // Reduced from 2 for better performance
+            devicePixelRatio: 1.5,
             width: 600 * 1.5,
             height: 600 * 1.5,
             phi: 0,
             theta: 0,
-            dark: 1,
+            dark: isDark ? 1 : 0,
             diffuse: 1.2,
-            mapSamples: 10000, // Reduced from 16000
-            mapBrightness: 6,
-            baseColor: [0.1, 0.1, 0.1], // Dark gray base
-            markerColor: [0.5, 0.2, 0.9], // Violet markers
-            glowColor: [0.2, 0.05, 0.4], // Violet glow
+            mapSamples: 10000,
+            mapBrightness: isDark ? 6 : 8,
+            baseColor: isDark ? [0.1, 0.1, 0.1] : [0.95, 0.95, 0.98],
+            markerColor: [0.5, 0.2, 0.9],
+            glowColor: isDark ? [0.2, 0.05, 0.4] : [0.7, 0.7, 0.8],
+            opacity: isDark ? 1 : 0.9,
             markers: [
-                // longitude latitude
                 { location: [37.7595, -122.4367], size: 0.03 },
                 { location: [40.7128, -74.006], size: 0.1 },
                 { location: [51.5, -0.12], size: 0.05 },
@@ -32,18 +36,16 @@ export function UserGlobe() {
                 { location: [-33.8688, 151.2093], size: 0.04 },
                 { location: [-23.5505, -46.6333], size: 0.06 },
             ],
-            onRender: (state) => {
-                // Called on every animation frame.
-                // `state` will be an empty object, return updated params.
+            onRender: (state: any) => {
                 state.phi = phi
-                phi += 0.005 // Slower rotation for less visual noise
+                phi += 0.005
             },
         })
 
         return () => {
             globe.destroy()
         }
-    }, [])
+    }, [theme])
 
     return (
         <div className="w-full h-full flex items-center justify-center relative overflow-hidden group">

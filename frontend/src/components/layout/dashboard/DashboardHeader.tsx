@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { Bell, Search, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
+import { ThemeToggle } from "@/components/ui/ThemeToggle"
 import { UserService } from "@/services/user.service"
 import { User } from "@/services/auth.service"
 
@@ -18,8 +19,6 @@ export function DashboardHeader({ role }: { role: string }) {
         setHasMounted(true)
     }, [])
 
-    if (!hasMounted) return <div className="h-16 border-b border-white/10 bg-black/60 sticky top-0 z-40" />
-
     const handleProfileClick = () => {
         const settingsPath = role === 'AGENT' ? '/dashboard/agent/settings' : '/dashboard/affiliate/settings'
         router.push(settingsPath)
@@ -27,13 +26,13 @@ export function DashboardHeader({ role }: { role: string }) {
 
     const displayName = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email : 'Loading...'
     return (
-        <header className="h-16 border-b border-white/10 bg-black/60 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40">
+        <header className="h-16 border-b border-border glass-panel flex items-center justify-between px-6 sticky top-0 z-40">
             <div className="flex items-center gap-4 w-96">
                 <div className="relative w-full group">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search..."
-                        className="pl-9 bg-white/5 border-transparent focus:bg-black/40 focus:border-primary/20 transition-all"
+                        className="pl-9 bg-muted/50 border-transparent focus:bg-card focus:border-primary/20 transition-all text-foreground"
                     />
                 </div>
             </div>
@@ -44,6 +43,8 @@ export function DashboardHeader({ role }: { role: string }) {
                     <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-primary animate-pulse" />
                 </button>
 
+                <ThemeToggle />
+
                 <div className="h-8 w-[1px] bg-white/10" />
 
                 <div className="flex items-center gap-3 cursor-pointer group" onClick={handleProfileClick}>
@@ -52,8 +53,8 @@ export function DashboardHeader({ role }: { role: string }) {
                         <p className="text-xs text-muted-foreground capitalize">{role.toLowerCase()}</p>
                     </div>
                     <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-violet-600 p-[1px] group-hover:scale-110 transition-transform">
-                        <div className="h-full w-full rounded-full bg-black flex items-center justify-center">
-                            <UserCircle className="h-full w-full text-white/80 group-hover:text-primary transition-colors" />
+                        <div className="h-full w-full rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                            <UserCircle className="h-full w-full text-foreground/80 group-hover:text-primary transition-colors" />
                         </div>
                     </div>
                 </div>

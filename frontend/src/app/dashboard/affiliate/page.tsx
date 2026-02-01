@@ -15,7 +15,7 @@ const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(
 
 const AffiliatePerformanceChart = dynamic(() => import('@/components/dashboard/charts/AffiliatePerformanceChart'), {
     ssr: false,
-    loading: () => <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground text-xs animate-pulse bg-white/5 rounded-xl">Loading Chart...</div>
+    loading: () => <div className="w-full h-[300px] flex items-center justify-center text-muted-foreground text-xs animate-pulse bg-muted/20 rounded-xl">Loading Chart...</div>
 })
 
 export default function AffiliateDashboard() {
@@ -59,7 +59,7 @@ export default function AffiliateDashboard() {
         <div className="space-y-8">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-white">Affiliate Dashboard</h1>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Affiliate Dashboard</h1>
                     <p className="text-muted-foreground">Track your campaigns and manage your referral assets.</p>
                 </div>
                 <Button
@@ -107,18 +107,18 @@ export default function AffiliateDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
                 {/* Conversion Chart */}
-                <div className="lg:col-span-2 2xl:col-span-3 bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                    <h3 className="text-lg font-semibold text-white mb-6">Campaign Performance</h3>
+                <div className="lg:col-span-2 2xl:col-span-3 glass-panel rounded-2xl p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-6">Campaign Performance</h3>
                     <AffiliatePerformanceChart />
                 </div>
 
                 {/* Right Column: Globe & Quick Link */}
                 <div className="space-y-6">
                     {/* Live Traffic Globe */}
-                    <div className="bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col h-[300px]">
+                    <div className="glass-panel rounded-2xl relative overflow-hidden flex flex-col h-[300px]">
                         <div className="p-4 pb-0 z-10 flex justify-between items-center">
                             <div>
-                                <h3 className="text-md font-semibold text-white">Live Traffic</h3>
+                                <h3 className="text-md font-semibold text-foreground">Live Traffic</h3>
                                 <p className="text-xs text-muted-foreground">Real-time clicks</p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -137,12 +137,12 @@ export default function AffiliateDashboard() {
                     </div>
 
                     {/* Quick Link Generator */}
-                    <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-sm space-y-4">
+                    <div className="glass-panel rounded-2xl p-6 space-y-4">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 rounded-lg bg-primary/10">
                                 <LinkIcon className="h-5 w-5 text-primary" />
                             </div>
-                            <h3 className="text-lg font-semibold text-white">Quick Link</h3>
+                            <h3 className="text-lg font-semibold text-foreground">Quick Link</h3>
                         </div>
 
                         <div className="space-y-3">
@@ -152,7 +152,7 @@ export default function AffiliateDashboard() {
                                     value={targetUrl}
                                     onChange={(e) => setTargetUrl(e.target.value)}
                                     placeholder="https://nexusplay.com/casino"
-                                    className="bg-black/20"
+                                    className="bg-muted/30"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -161,7 +161,7 @@ export default function AffiliateDashboard() {
                                     value={campaignName}
                                     onChange={(e) => setCampaignName(e.target.value)}
                                     placeholder="summer_promo"
-                                    className="bg-black/20"
+                                    className="bg-muted/30"
                                 />
                             </div>
                             {generatedLink && (
@@ -171,7 +171,7 @@ export default function AffiliateDashboard() {
                                         <Input
                                             value={generatedLink}
                                             readOnly
-                                            className="bg-black/20 text-green-400 font-mono text-xs"
+                                            className="bg-muted/30 text-green-500 font-mono text-xs"
                                         />
                                         <Button variant="outline" size="sm" onClick={handleCopyLink}>
                                             <Copy className="h-4 w-4" />
@@ -198,15 +198,15 @@ export default function AffiliateDashboard() {
 
 function StatsCard({ title, value, change, icon, isLoading }: { title: string, value: string, change: string, icon: React.ReactNode, isLoading?: boolean }) {
     return (
-        <Card className="p-6 bg-black/40 border-white/10 backdrop-blur-sm hover:border-primary/20 transition-all group">
+        <Card className="p-6 glass-panel hover:border-primary/20 transition-all group">
             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <h3 className="tracking-tight text-sm font-medium text-muted-foreground group-hover:text-white transition-colors">
+                <h3 className="tracking-tight text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                     {title}
                 </h3>
                 {icon}
             </div>
             <div className="pt-2">
-                <div className={`text-2xl font-bold text-white ${isLoading ? 'animate-pulse' : ''}`}>{value}</div>
+                <div className={`text-2xl font-bold text-foreground ${isLoading ? 'animate-pulse' : ''}`}>{value}</div>
                 <p className="text-xs text-muted-foreground mt-1">{change}</p>
             </div>
         </Card>

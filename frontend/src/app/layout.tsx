@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { cn } from '@/lib/utils'
 
-import { ThemeProvider } from "@/components/ui/ThemeProvider"
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import { AppProviders as Providers } from '@/lib/providers'
 
 
@@ -65,12 +65,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="min-h-screen bg-background text-foreground selection:bg-primary/20 font-sans antialiased">
         <Providers>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <ThemeProvider>
             {children}
           </ThemeProvider>
         </Providers>

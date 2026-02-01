@@ -149,8 +149,8 @@ export default function AffiliateProfilePage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
                         className={`relative px-6 py-3 rounded-xl font-medium transition-all flex items-center gap-2 ${activeTab === tab.id
-                                ? 'text-white'
-                                : 'text-muted-foreground hover:text-white'
+                            ? 'text-white'
+                            : 'text-muted-foreground hover:text-white'
                             }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -330,9 +330,9 @@ export default function AffiliateProfilePage() {
                                 Payout Requests Management
                             </h3>
 
-                            {payoutsData?.items && payoutsData.items.length > 0 ? (
+                            {payoutsData?.payouts && payoutsData.payouts.length > 0 ? (
                                 <div className="space-y-4">
-                                    {payoutsData.items.map((payout: any) => (
+                                    {payoutsData.payouts.map((payout: any) => (
                                         <motion.div
                                             key={payout.id}
                                             initial={{ opacity: 0, y: 10 }}

@@ -1,9 +1,12 @@
 "use client"
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { useAffiliatePerformance } from '@/hooks/useAffiliateDashboard'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function AffiliatePerformanceChart() {
     const { data: performanceData, isLoading } = useAffiliatePerformance(7)
+    const { theme } = useTheme()
+    const isDark = theme === 'dark'
 
     // Transform API data to chart format
     const chartData = performanceData?.map(point => ({
@@ -43,12 +46,32 @@ export default function AffiliatePerformanceChart() {
                             <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}
+                        vertical={false}
+                    />
+                    <XAxis
+                        dataKey="name"
+                        stroke={isDark ? "#888888" : "#444444"}
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                    />
+                    <YAxis
+                        stroke={isDark ? "#888888" : "#444444"}
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                    />
                     <RechartsTooltip
-                        contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                        itemStyle={{ color: '#fff' }}
+                        contentStyle={{
+                            backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+                            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                            borderRadius: '8px',
+                            color: isDark ? '#ffffff' : '#000000'
+                        }}
+                        itemStyle={{ color: isDark ? '#ffffff' : '#000000' }}
                     />
                     <Area type="monotone" dataKey="clicks" stroke="#3b82f6" fillOpacity={1} fill="url(#colorClicks)" />
                     <Area type="monotone" dataKey="conversions" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorConv)" />

@@ -39,13 +39,13 @@ export function Sidebar({ role }: { role: Role }) {
     const links = role === "AGENT" ? agentLinks : affiliateLinks
 
     return (
-        <aside className="h-full w-full bg-black/60 backdrop-blur-xl border-r border-white/10 flex flex-col">
+        <aside className="h-full w-full glass-panel border-r flex flex-col">
             <div className="p-6">
                 <Link href="/" className="flex items-center gap-3 group">
                     <div className="p-2 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                         <Gamepad2 className="h-6 w-6 text-primary" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight text-white">Nexus<span className="text-primary">Play</span></span>
+                    <span className="text-xl font-bold tracking-tight text-foreground">Nexus<span className="text-primary">Play</span></span>
                 </Link>
             </div>
 
@@ -56,7 +56,7 @@ export function Sidebar({ role }: { role: Role }) {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group overflow-hidden ${isActive ? "text-white" : "text-muted-foreground hover:text-white"
+                            className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group overflow-hidden ${isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                                 }`}
                         >
                             {/* Active Glow Background */}
@@ -73,14 +73,14 @@ export function Sidebar({ role }: { role: Role }) {
                             <span className="font-medium relative z-10">{link.label}</span>
 
                             {/* Hover light effect */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/5 transition-opacity duration-300 rounded-xl" />
+                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-primary/5 transition-opacity duration-300 rounded-xl" />
                         </Link>
                     )
                 })}
             </nav>
 
-            <div className="p-4 border-t border-white/5">
-                <Link href="/auth/login" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
+            <div className="p-4 border-t border-border/50">
+                <Link href="/auth/login" className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
                     <LogOut className="h-5 w-5" />
                     <span className="font-medium">Logout</span>
                 </Link>

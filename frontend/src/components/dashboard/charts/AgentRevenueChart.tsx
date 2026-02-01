@@ -1,5 +1,7 @@
+"use client"
 import { BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { RevenueChartPoint } from '@/services/agent.service'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface AgentRevenueChartProps {
     data?: RevenueChartPoint[]
@@ -7,6 +9,9 @@ interface AgentRevenueChartProps {
 }
 
 export default function AgentRevenueChart({ data = [], isLoading = false }: AgentRevenueChartProps) {
+    const { theme } = useTheme()
+    const isDark = theme === 'dark'
+
     return (
         <div className="h-[300px] w-full">
             {isLoading ? (
@@ -20,25 +25,34 @@ export default function AgentRevenueChart({ data = [], isLoading = false }: Agen
             ) : (
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}
+                            vertical={false}
+                        />
                         <XAxis
                             dataKey="date"
-                            stroke="#888888"
+                            stroke={isDark ? "#888888" : "#444444"}
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                         />
                         <YAxis
-                            stroke="#888888"
+                            stroke={isDark ? "#888888" : "#444444"}
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                             tickFormatter={(value) => `$${value}`}
                         />
                         <RechartsTooltip
-                            contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
-                            itemStyle={{ color: '#fff' }}
-                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                            contentStyle={{
+                                backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+                                border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                                borderRadius: '8px',
+                                color: isDark ? '#ffffff' : '#000000'
+                            }}
+                            itemStyle={{ color: isDark ? '#ffffff' : '#000000' }}
+                            cursor={{ fill: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}
                         />
                         <Bar
                             dataKey="revenue"

@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    /* Light Mode - Clean, crisp, high contrast with soft violet tint */
-    --background: 260 20% 98%;
-    --foreground: 260 25% 15%;
+    /* Light Mode - High contrast, clear and readable */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 260 25% 15%;
+    --card: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 260 25% 15%;
+    --popover-foreground: 222 47% 11%;
 
     --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 20% 96%;
-    --secondary-foreground: 260 25% 15%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 260 20% 92%;
-    --muted-foreground: 260 10% 45%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
 
     --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 260 20% 90%;
-    --input: 260 20% 90%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 262 83% 58%;
 
     --font-heading: var(--font-inter);
@@ -74,6 +74,7 @@
 @layer base {
   * {
     border-color: hsl(var(--border));
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   }
 
   body {
@@ -82,22 +83,27 @@
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
 /* Glassmorphism Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: hsl(var(--card) / 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
 }
 
 .dark .glass {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: none;
+}
+
+.glass-panel {
+  @apply bg-card/60 backdrop-blur-xl border border-border/50;
 }
 
 /* Custom Scrollbar */
