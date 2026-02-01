@@ -132,7 +132,7 @@ export function useSeedWallet() {
             queryClient.invalidateQueries({ queryKey: payoutKeys.all })
             queryClient.invalidateQueries({ queryKey: ['agent', 'wallet'] })
             queryClient.invalidateQueries({ queryKey: dashboardKeys.stats() })
-            queryClient.invalidateQueries({ queryKey: ['commissions'] })
+            queryClient.invalidateQueries({ queryKey: commissionKeys.all })
             toast.success('Wallet seeded successfully! (Test Mode)')
         },
         onError: (err: any) => {
