@@ -237,8 +237,8 @@ async def get_wallet(
                         "destination": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
                         "status": "PENDING",
                         "requested_at": "2026-02-01T12:00:00",
-                        "processed_at": null,
-                        "rejection_reason": null
+                        "processed_at": None,
+                        "rejection_reason": None
                     }
                 }
             }
