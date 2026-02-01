@@ -329,16 +329,8 @@ class AgentService:
         except:
             pending_commission = Decimal("0")
         
-        # Get total earned (all commission amounts)
-        try:
-            earned_result = await db.execute(
-                select(func.sum(Commission.amount)).where(
-                    Commission.agent_id == agent_id
-                )
-            )
-            total_earned = earned_result.scalar() or Decimal("0")
-        except:
-            total_earned = Decimal("0")
+        # Get total earned (Robust Lifetime Earnings: Balance + Pending + Withdrawn)
+        total_earned = wallet.balance + total_payouts + pending_payouts
         
         # Get total withdrawn (PAID status)
         try:
