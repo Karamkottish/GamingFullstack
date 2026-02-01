@@ -1,10 +1,12 @@
 "use client"
-import { MousePointer2, UserPlus, DollarSign, Copy, Download, Link as LinkIcon, Image } from "lucide-react"
+import { MousePointer2, UserPlus, DollarSign, Copy, Link as LinkIcon, TrendingUp, Wallet, Zap } from "lucide-react"
 import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import dynamic from 'next/dynamic'
-import { useAffiliateStats, useAffiliatePerformance } from "@/hooks/useAffiliateDashboard"
+import { useAffiliateStats, useCreateLink, useSeedCampaignData } from "@/hooks/useAffiliateDashboard"
+import { useState } from "react"
+import toast from "react-hot-toast"
 
 const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(mod => mod.UserGlobe), {
     ssr: false,
@@ -17,38 +19,89 @@ const AffiliatePerformanceChart = dynamic(() => import('@/components/dashboard/c
 })
 
 export default function AffiliateDashboard() {
+    const { data: stats, isLoading } = useAffiliateStats()
+    const createLink = useCreateLink()
+    const seedCampaignData = useSeedCampaignData()
+    const [targetUrl, setTargetUrl] = useState("https://nexusplay.com/casino")
+    const [campaignName, setCampaignName] = useState("")
+    const [generatedLink, setGeneratedLink] = useState("")
+
+    const handleGenerateLink = async () => {
+        if (!campaignName.trim()) {
+            toast.error("Please enter a campaign name")
+            return
+        }
+
+        try {
+            const result = await createLink.mutateAsync({
+                target_url: targetUrl,
+                campaign_name: campaignName
+            })
+            setGeneratedLink(result.short_link)
+            toast.success("Link generated!")
+        } catch (error) {
+            // Error handled by mutation
+        }
+    }
+
+    const handleCopyLink = () => {
+        if (generatedLink) {
+            navigator.clipboard.writeText(generatedLink)
+            toast.success("Link copied to clipboard!")
+        }
+    }
+
+    const handleSeedCampaign = () => {
+        seedCampaignData.mutate({ days: 7 })
+    }
+
     return (
         <div className="space-y-8">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight text-white">Affiliate Dashboard</h1>
-                <p className="text-muted-foreground">Track your campaigns and manage your referral assets.</p>
+            <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Affiliate Dashboard</h1>
+                    <p className="text-muted-foreground">Track your campaigns and manage your referral assets.</p>
+                </div>
+                <Button
+                    variant="outline"
+                    className="gap-2 border-purple-500/20 text-purple-400 hover:bg-purple-500/10"
+                    onClick={handleSeedCampaign}
+                    disabled={seedCampaignData.isPending}
+                >
+                    <Zap className="h-4 w-4" />
+                    {seedCampaignData.isPending ? "Seeding..." : "Seed Campaign Data"}
+                </Button>
             </div>
 
             {/* Stats Grid - 4K Optimized */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4">
                 <StatsCard
                     title="Total Clicks"
-                    value="12,543"
-                    change="+24% this week"
+                    value={isLoading ? "..." : stats?.total_clicks.toLocaleString() || "0"}
+                    change={stats?.conversion_rate ? `${stats.conversion_rate.toFixed(1)}% conversion` : "Loading..."}
                     icon={<MousePointer2 className="h-4 w-4 text-blue-400" />}
+                    isLoading={isLoading}
                 />
                 <StatsCard
                     title="Registrations"
-                    value="892"
-                    change="7.1% Conversion Rate"
+                    value={isLoading ? "..." : stats?.registrations.toLocaleString() || "0"}
+                    change={stats && stats.total_clicks > 0 ? `${((stats.registrations / stats.total_clicks) * 100).toFixed(1)}% Click-to-Reg` : "Loading..."}
                     icon={<UserPlus className="h-4 w-4 text-violet-400" />}
+                    isLoading={isLoading}
                 />
                 <StatsCard
                     title="First Deposits (FTD)"
-                    value="345"
-                    change="38% Reg-to-Dep"
-                    icon={<DollarSign className="h-4 w-4 text-green-400" />}
+                    value={isLoading ? "..." : stats?.ftd_count.toLocaleString() || "0"}
+                    change={stats && stats.registrations > 0 ? `${((stats.ftd_count / stats.registrations) * 100).toFixed(1)}% Reg-to-Dep` : "Loading..."}
+                    icon={<TrendingUp className="h-4 w-4 text-green-400" />}
+                    isLoading={isLoading}
                 />
                 <StatsCard
                     title="Total Revenue"
-                    value="$15,234.00"
-                    change="+12% from last month"
-                    icon={<DollarSign className="h-4 w-4 text-amber-400" />}
+                    value={isLoading ? "..." : `$${parseFloat(stats?.total_revenue || "0").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    change={stats?.pending_payouts ? `$${stats.pending_payouts} pending` : "Loading..."}
+                    icon={<Wallet className="h-4 w-4 text-amber-400" />}
+                    isLoading={isLoading}
                 />
             </div>
 
@@ -61,7 +114,7 @@ export default function AffiliateDashboard() {
 
                 {/* Right Column: Globe & Quick Link */}
                 <div className="space-y-6">
-                    {/* Live Traffic Globe (New) */}
+                    {/* Live Traffic Globe */}
                     <div className="bg-black/40 border border-white/10 rounded-2xl backdrop-blur-sm relative overflow-hidden flex flex-col h-[300px]">
                         <div className="p-4 pb-0 z-10 flex justify-between items-center">
                             <div>
@@ -92,13 +145,49 @@ export default function AffiliateDashboard() {
                             <h3 className="text-lg font-semibold text-white">Quick Link</h3>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-muted-foreground uppercase">Target</label>
-                            <Input placeholder="https://nexusplay.com/casino" className="bg-black/20" />
+                        <div className="space-y-3">
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Target URL</label>
+                                <Input
+                                    value={targetUrl}
+                                    onChange={(e) => setTargetUrl(e.target.value)}
+                                    placeholder="https://nexusplay.com/casino"
+                                    className="bg-black/20"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Campaign Name</label>
+                                <Input
+                                    value={campaignName}
+                                    onChange={(e) => setCampaignName(e.target.value)}
+                                    placeholder="summer_promo"
+                                    className="bg-black/20"
+                                />
+                            </div>
+                            {generatedLink && (
+                                <div className="space-y-2">
+                                    <label className="text-xs font-semibold text-green-400 uppercase">Generated Link</label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={generatedLink}
+                                            readOnly
+                                            className="bg-black/20 text-green-400 font-mono text-xs"
+                                        />
+                                        <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                                            <Copy className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <Button variant="glow" className="w-full">
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy Link
+                        <Button
+                            variant="glow"
+                            className="w-full"
+                            onClick={handleGenerateLink}
+                            disabled={createLink.isPending}
+                        >
+                            <LinkIcon className="h-4 w-4 mr-2" />
+                            {createLink.isPending ? "Generating..." : "Generate Link"}
                         </Button>
                     </div>
                 </div>
@@ -107,7 +196,7 @@ export default function AffiliateDashboard() {
     )
 }
 
-function StatsCard({ title, value, change, icon }: { title: string, value: string, change: string, icon: React.ReactNode }) {
+function StatsCard({ title, value, change, icon, isLoading }: { title: string, value: string, change: string, icon: React.ReactNode, isLoading?: boolean }) {
     return (
         <Card className="p-6 bg-black/40 border-white/10 backdrop-blur-sm hover:border-primary/20 transition-all group">
             <div className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -117,7 +206,7 @@ function StatsCard({ title, value, change, icon }: { title: string, value: strin
                 {icon}
             </div>
             <div className="pt-2">
-                <div className="text-2xl font-bold text-white">{value}</div>
+                <div className={`text-2xl font-bold text-white ${isLoading ? 'animate-pulse' : ''}`}>{value}</div>
                 <p className="text-xs text-muted-foreground mt-1">{change}</p>
             </div>
         </Card>

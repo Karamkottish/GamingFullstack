@@ -1,21 +1,38 @@
 "use client"
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-
-const data = [
-    { name: 'Mon', clicks: 120, conversions: 10 },
-    { name: 'Tue', clicks: 150, conversions: 22 },
-    { name: 'Wed', clicks: 200, conversions: 35 },
-    { name: 'Thu', clicks: 180, conversions: 30 },
-    { name: 'Fri', clicks: 250, conversions: 45 },
-    { name: 'Sat', clicks: 300, conversions: 60 },
-    { name: 'Sun', clicks: 350, conversions: 75 },
-]
+import { useAffiliatePerformance } from '@/hooks/useAffiliateDashboard'
 
 export default function AffiliatePerformanceChart() {
+    const { data: performanceData, isLoading } = useAffiliatePerformance(7)
+
+    // Transform API data to chart format
+    const chartData = performanceData?.map(point => ({
+        name: new Date(point.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        clicks: point.clicks,
+        conversions: point.conversions,
+        revenue: parseFloat(point.revenue)
+    })) || []
+
+    if (isLoading) {
+        return (
+            <div className="h-[300px] w-full flex items-center justify-center">
+                <div className="text-muted-foreground text-sm animate-pulse">Loading performance data...</div>
+            </div>
+        )
+    }
+
+    if (chartData.length === 0) {
+        return (
+            <div className="h-[300px] w-full flex items-center justify-center">
+                <div className="text-muted-foreground text-sm">No performance data yet. Click "Seed Campaign Data" to generate demo data.</div>
+            </div>
+        )
+    }
+
     return (
         <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={chartData}>
                     <defs>
                         <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
