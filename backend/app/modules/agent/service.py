@@ -64,12 +64,40 @@ class AgentService:
         except:
             pending_commission = Decimal("0")
         
-        # Get wallet balance
+        # Get wallet balance and payouts
         wallet_result = await db.execute(
             select(Wallet).where(Wallet.user_id == agent_id)
         )
         wallet = wallet_result.scalars().first()
         withdrawable_balance = wallet.balance if wallet else Decimal("0")
+        
+        total_payouts = Decimal("0")
+        pending_payouts = Decimal("0")
+        
+        if wallet:
+            # Get total payouts (PAID)
+            payouts_result = await db.execute(
+                select(func.sum(Transaction.amount)).where(
+                    and_(
+                        Transaction.wallet_id == wallet.id,
+                        Transaction.type == 'WITHDRAWAL',
+                        Transaction.status == 'PAID'
+                    )
+                )
+            )
+            total_payouts = abs(payouts_result.scalar() or Decimal("0"))
+            
+            # Get pending payouts
+            pending_payouts_result = await db.execute(
+                select(func.sum(Transaction.amount)).where(
+                    and_(
+                        Transaction.wallet_id == wallet.id,
+                        Transaction.type == 'WITHDRAWAL',
+                        Transaction.status == 'PENDING'
+                    )
+                )
+            )
+            pending_payouts = abs(pending_payouts_result.scalar() or Decimal("0"))
         
         # This month's commission (simple calculation)
         month_start = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -90,6 +118,8 @@ class AgentService:
             total_revenue=total_revenue,
             total_commission=total_commission,
             pending_commission=pending_commission,
+            total_payouts=total_payouts,
+            pending_payouts=pending_payouts,
             withdrawable_balance=withdrawable_balance,
             this_month_revenue=this_month_revenue,
             this_month_commission=this_month_commission
@@ -310,24 +340,40 @@ class AgentService:
         except:
             total_earned = Decimal("0")
         
-        # Get total withdrawn
+        # Get total withdrawn (PAID status)
         try:
             withdrawn_result = await db.execute(
                 select(func.sum(Transaction.amount)).where(
                     and_(
                         Transaction.wallet_id == wallet.id,
                         Transaction.type == 'WITHDRAWAL',
-                        Transaction.status == 'COMPLETED'
+                        Transaction.status == 'PAID'
                     )
                 )
             )
             total_withdrawn = abs(withdrawn_result.scalar() or Decimal("0"))
         except:
             total_withdrawn = Decimal("0")
+
+        # Get pending payouts (PENDING status)
+        try:
+            pending_payouts_result = await db.execute(
+                select(func.sum(Transaction.amount)).where(
+                    and_(
+                        Transaction.wallet_id == wallet.id,
+                        Transaction.type == 'WITHDRAWAL',
+                        Transaction.status == 'PENDING'
+                    )
+                )
+            )
+            pending_payouts = abs(pending_payouts_result.scalar() or Decimal("0"))
+        except:
+            pending_payouts = Decimal("0")
         
         return schemas.WalletBalance(
             commission_balance=wallet.balance,
             pending_commission=pending_commission,
+            pending_payouts=pending_payouts,
             total_withdrawn=total_withdrawn,
             total_earned=total_earned
         )
@@ -457,6 +503,9 @@ class AgentService:
                 detail=f"Insufficient balance. Available: ${wallet.balance}"
             )
         
+        # Deduct from balance immediately to reflect "Liquid Balance" change
+        wallet.balance -= payout_in.amount
+        
         # Create withdrawal transaction
         transaction = Transaction(
             wallet_id=wallet.id,
@@ -466,8 +515,8 @@ class AgentService:
             tx_metadata={
                 "method": payout_in.method,
                 "wallet_address": payout_in.wallet_address,
-                "balance_before": str(wallet.balance),
-                "balance_after": str(wallet.balance - payout_in.amount),
+                "balance_before": str(wallet.balance + payout_in.amount),
+                "balance_after": str(wallet.balance),
                 "description": f"Withdrawal request via {payout_in.method}"
             }
         )

@@ -11,6 +11,8 @@ class AgentStats(BaseModel):
     total_revenue: Decimal
     total_commission: Decimal
     pending_commission: Decimal
+    total_payouts: Decimal = Decimal("0")
+    pending_payouts: Decimal = Decimal("0")
     withdrawable_balance: Decimal
     this_month_revenue: Decimal = Decimal("0")
     this_month_commission: Decimal = Decimal("0")
@@ -51,6 +53,7 @@ class AddUserRequest(BaseModel):
 class WalletBalance(BaseModel):
     commission_balance: Decimal
     pending_commission: Decimal
+    pending_payouts: Decimal = Decimal("0")
     total_withdrawn: Decimal = Decimal("0")
     total_earned: Decimal
     currency: str = "USD"
