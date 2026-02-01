@@ -118,3 +118,16 @@ class PayoutsList(BaseModel):
 
 class PayoutApprovalRequest(BaseModel):
     reason: Optional[str] = None
+
+# Testing/Utility
+class WalletSeedRequest(BaseModel):
+    """Request to seed wallet balance for testing"""
+    amount: Decimal = Field(..., gt=0, le=1000000, description="Amount to add to wallet")
+
+class WalletSeedResponse(BaseModel):
+    """Response after seeding wallet"""
+    status: str = "success"
+    new_balance: Decimal
+    transaction_id: UUID
+    message: str
+

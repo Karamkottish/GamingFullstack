@@ -619,3 +619,54 @@ class AgentService:
             processed_at=transaction.updated_at,
             rejection_reason=reason
         )
+
+    @staticmethod
+    async def seed_wallet(db: AsyncSession, agent_id: UUID, amount: Decimal) -> dict:
+        """
+        Add real money to agent wallet for testing purposes.
+        Fully atomic and handles all balance fields for consistency.
+        """
+        # Get wallet with lock for safety
+        result = await db.execute(
+            select(Wallet)
+            .where(Wallet.user_id == agent_id)
+            .with_for_update()
+        )
+        wallet = result.scalars().first()
+        
+        if not wallet:
+            wallet = Wallet(user_id=agent_id, balance=Decimal("0"))
+            db.add(wallet)
+            await db.flush()
+            
+        balance_before = wallet.balance
+        wallet.balance += amount
+        
+        # Add a mock transaction for history
+        transaction = Transaction(
+            wallet_id=wallet.id,
+            type='DEPOSIT',
+            amount=amount,
+            # balance_before and balance_after fields would be nice if they exist in DB
+            # but searching wallet models shows they might not be there yet. 
+            # I will use tx_metadata as a fallback for high performance auditing.
+            tx_metadata={
+                "description": "Test Seed Balance",
+                "balance_before": str(balance_before),
+                "balance_after": str(wallet.balance),
+                "test_seed": True
+            },
+            status='COMPLETED'
+        )
+        db.add(transaction)
+        
+        await db.commit()
+        await db.refresh(wallet)
+        
+        return {
+            "status": "success",
+            "new_balance": wallet.balance,
+            "transaction_id": transaction.id,
+            "message": f"Successfully seeded ${amount} to wallet."
+        }
+
