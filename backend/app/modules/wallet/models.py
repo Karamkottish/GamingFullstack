@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from app.core.database import Base
 import enum
+from decimal import Decimal
 
 class TransactionType(str, enum.Enum):
     DEPOSIT = "DEPOSIT"
