@@ -466,7 +466,7 @@ class AgentService:
             balance_after=wallet.balance - payout_in.amount,
             description=f"Withdrawal request via {payout_in.method}",
             status='PENDING',
-            metadata={"method": payout_in.method, "wallet_address": payout_in.wallet_address}
+            tx_metadata={"method": payout_in.method, "wallet_address": payout_in.wallet_address}
         )
         
         db.add(transaction)
@@ -535,7 +535,7 @@ class AgentService:
         
         payout_list = []
         for t in transactions:
-            metadata = t.metadata or {}
+            metadata = t.tx_metadata or {}
             payout_list.append(schemas.PayoutRecord(
                 id=t.id,
                 amount=abs(t.amount),
@@ -568,7 +568,7 @@ class AgentService:
         await db.commit()
         await db.refresh(transaction)
         
-        metadata = transaction.metadata or {}
+        metadata = transaction.tx_metadata or {}
         return schemas.PayoutRecord(
             id=transaction.id,
             amount=abs(transaction.amount),
@@ -602,9 +602,9 @@ class AgentService:
             
         transaction.status = 'REJECTED'
         transaction.updated_at = datetime.utcnow()
-        metadata = (transaction.metadata or {}).copy()
+        metadata = (transaction.tx_metadata or {}).copy()
         metadata['rejection_reason'] = reason
-        transaction.metadata = metadata
+        transaction.tx_metadata = metadata
         
         await db.commit()
         await db.refresh(transaction)

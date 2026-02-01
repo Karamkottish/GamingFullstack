@@ -37,7 +37,7 @@ class Transaction(Base):
     status = Column(String, default="PENDING") # PENDING, COMPLETED, FAILED
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    metadata = Column(postgresql.JSONB, nullable=True) # Store additional info like rejection reason, payment details
+    tx_metadata = Column(postgresql.JSONB, nullable=True) # Store additional info like rejection reason, payment details
 
     # Relationships
     wallet = relationship("Wallet", back_populates="transactions")
