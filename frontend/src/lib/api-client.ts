@@ -9,7 +9,9 @@ interface ApiErrorResponse {
 
 // Create Axios Instance
 const apiClient: AxiosInstance = axios.create({
-    baseURL: '/api', // Using /api as baseURL to handle proxy through next.config.ts rewrites
+    baseURL: process.env.NEXT_PUBLIC_API_URL
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api`
+        : '/api',
     headers: {
         'Content-Type': 'application/json',
     },

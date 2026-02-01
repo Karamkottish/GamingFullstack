@@ -11,7 +11,8 @@ import {
     LogOut,
     Gamepad2,
     Link as LinkIcon,
-    FileBarChart
+    FileBarChart,
+    Landmark
 } from "lucide-react"
 
 type Role = "AGENT" | "AFFILIATE"
@@ -23,6 +24,7 @@ export function Sidebar({ role }: { role: Role }) {
         { href: "/dashboard/agent", label: "Overview", icon: LayoutDashboard },
         { href: "/dashboard/agent/users", label: "User Management", icon: Users },
         { href: "/dashboard/agent/commission", label: "Commission", icon: Wallet },
+        { href: "/dashboard/agent/withdrawals", label: "Withdrawals", icon: Landmark },
         { href: "/dashboard/agent/settings", label: "Settings", icon: Settings },
     ]
 

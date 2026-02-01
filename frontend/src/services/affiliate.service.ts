@@ -1,40 +1,53 @@
 import { api } from '@/lib/api-client'
 
 export interface AffiliateStats {
-    totalClicks: number
+    total_clicks: number
     registrations: number
-    ftdCount: number
-    totalRevenue: number
+    ftd_count: number
+    total_revenue: number
+}
+
+export interface PerformancePoint {
+    name: string
+    clicks: number
+    conversions: number
+}
+
+export interface CreateLinkRequest {
+    target_url: string
+    campaign_name: string
+}
+
+export interface LinkResponse {
+    short_link: string
+}
+
+export interface PayoutLog {
+    id: string
+    amount: number
+    method: string
+    status: string
+    date: string
 }
 
 export const AffiliateService = {
     getStats: async () => {
-        const response = await api.get<AffiliateStats>('/affiliate/stats')
+        const response = await api.get<AffiliateStats>('/v1/affiliate/stats')
         return response.data
     },
 
-    getPerformanceAnalytics: async () => {
-        const response = await api.get<any[]>('/affiliate/analytics/performance')
+    getPerformance: async () => {
+        const response = await api.get<PerformancePoint[]>('/v1/affiliate/analytics/performance')
         return response.data
     },
 
-    generateLink: async (targetUrl: string, campaignName: string) => {
-        const response = await api.post<{ shortLink: string }>('/affiliate/links', { targetUrl, campaignName })
+    createLink: async (data: CreateLinkRequest) => {
+        const response = await api.post<LinkResponse>('/v1/affiliate/links', data)
         return response.data
     },
 
-    getMarketingAssets: async () => {
-        const response = await api.get<any[]>('/affiliate/marketing/assets')
-        return response.data
-    },
-
-    getPayouts: async () => {
-        const response = await api.get<any[]>('/affiliate/payouts')
-        return response.data
-    },
-
-    requestPayout: async (payload: { amount: number, method: string, address: string }) => {
-        const response = await api.post('/affiliate/payouts/request', payload)
+    getPayoutHistory: async () => {
+        const response = await api.get<PayoutLog[]>('/v1/affiliate/payouts')
         return response.data
     }
 }

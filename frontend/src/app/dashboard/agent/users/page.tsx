@@ -10,7 +10,7 @@ import { Modal } from "@/components/ui/Modal"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { useAgentUsers, useAddAgentUser, useToggleUserStatus } from "@/hooks/useAgentUsers"
-import toast from "react-hot-toast"
+import { toast } from "sonner"
 
 function TableSkeleton() {
     return (
@@ -143,6 +143,7 @@ export default function AgentUsersPage() {
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Search users by ID, Email or Username..."
                                     className="pl-9 bg-black/20 focus:bg-black/40 transition-all border-white/10"
+                                    suppressHydrationWarning
                                 />
                             </div>
                             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -150,6 +151,7 @@ export default function AgentUsersPage() {
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                     className="bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-all min-w-[140px]"
+                                    suppressHydrationWarning
                                 >
                                     <option value="ALL">All Status</option>
                                     <option value="ACTIVE">Active</option>
@@ -214,7 +216,7 @@ export default function AgentUsersPage() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <p className="text-white text-xs">{new Date(user.joined_at).toLocaleDateString()}</p>
+                                                    <p className="text-white text-xs" suppressHydrationWarning>{new Date(user.joined_at).toISOString().split('T')[0]}</p>
                                                     <p className="text-[10px] text-muted-foreground/40 mt-0.5">{user.last_active || 'Just now'}</p>
                                                 </td>
                                                 <td className="px-6 py-4">

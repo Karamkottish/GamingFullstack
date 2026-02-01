@@ -2,6 +2,6 @@
 
 import { WithdrawalsPage } from "@/features/payouts/WithdrawalsPage"
 
-export default function AffiliatePayoutsPage() {
+export default function AgentWithdrawalsPage() {
     return <WithdrawalsPage />
 }

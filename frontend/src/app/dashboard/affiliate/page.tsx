@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import dynamic from 'next/dynamic'
+import { useAffiliateStats, useAffiliatePerformance } from "@/hooks/useAffiliateDashboard"
 
 const UserGlobe = dynamic(() => import('@/components/dashboard/UserGlobe').then(mod => mod.UserGlobe), {
     ssr: false,

@@ -61,5 +61,13 @@ export const AuthService = {
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_role');
         window.location.href = '/auth/login';
+    },
+
+    changePassword: async (currentPassword: string, newPassword: string) => {
+        const response = await api.post('/v1/auth/change-password', {
+            current_password: currentPassword,
+            new_password: newPassword
+        });
+        return response.data;
     }
 };

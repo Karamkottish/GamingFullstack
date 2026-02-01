@@ -135,5 +135,32 @@ export const AgentService = {
     getPayoutHistory: async (page = 1, page_size = 20, status?: string) => {
         const response = await api.get<{ payouts: PayoutRecord[], total: number }>('/v1/agent/payouts', { params: { page, page_size, status } })
         return response.data
+    },
+
+    exportCommissions: async () => {
+        const response = await api.get('/v1/agent/commissions/export', { responseType: 'blob' })
+        const url = window.URL.createObjectURL(new Blob([response.data as Blob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `commissions_${new Date().toISOString().split('T')[0]}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    },
+
+    // Admin Simulation (For Demo)
+    approvePayout: async (payoutId: string) => {
+        const response = await api.post<PayoutRecord>(`/v1/agent/payouts/${payoutId}/approve`)
+        return response.data
+    },
+
+    rejectPayout: async (payoutId: string, reason: string) => {
+        const response = await api.post<PayoutRecord>(`/v1/agent/payouts/${payoutId}/reject`, { reason })
+        return response.data
+    },
+
+    seedWallet: async (amount: number) => {
+        const response = await api.post(`/v1/agent/testing/seed-wallet?amount=${amount}`)
+        return response.data
     }
 }

@@ -205,14 +205,14 @@ function StatsCard({ title, value, subValue, icon, isLoading, gradient }: { titl
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-white/5 relative z-10">
-                    <p className="text-[11px] text-muted-foreground font-medium flex items-center gap-2">
+                    <div className="text-[11px] text-muted-foreground font-medium flex items-center gap-2">
                         {isLoading ? <Skeleton width="80px" height="10px" /> : (
                             <>
                                 <span className="h-1 w-1 rounded-full bg-indigo-400" />
                                 {subValue}
                             </>
                         )}
-                    </p>
+                    </div>
                 </div>
             </Card>
         </motion.div>
