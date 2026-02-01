@@ -572,7 +572,7 @@ async def seed_campaign_data(
                     conversion = Conversion(
                         id=uuid.uuid4(),
                         link_id=link.id,
-                        user_id=uuid.uuid4(),
+                        user_id=None,  # Demo data - no real user
                         conversion_type='FIRST_DEPOSIT',
                         amount=deposit_amount,
                         commission_earned=commission,
@@ -584,7 +584,7 @@ async def seed_campaign_data(
                     conversion = Conversion(
                         id=uuid.uuid4(),
                         link_id=link.id,
-                        user_id=uuid.uuid4(),
+                        user_id=None,  # Demo data - no real user
                         conversion_type='REGISTRATION',
                         amount=None,
                         commission_earned=Decimal("5.00"),
