@@ -115,14 +115,14 @@ class AgentService:
         return schemas.AgentStats(
             total_users=total_users,
             active_users=active_users,
-            total_revenue=total_revenue,
-            total_commission=total_commission,
-            pending_commission=pending_commission,
-            total_payouts=total_payouts,
-            pending_payouts=pending_payouts,
-            withdrawable_balance=withdrawable_balance,
-            this_month_revenue=this_month_revenue,
-            this_month_commission=this_month_commission
+            total_revenue=total_revenue.quantize(Decimal("0.01")),
+            total_commission=total_commission.quantize(Decimal("0.01")),
+            pending_commission=pending_commission.quantize(Decimal("0.01")),
+            total_payouts=total_payouts.quantize(Decimal("0.01")),
+            pending_payouts=pending_payouts.quantize(Decimal("0.01")),
+            withdrawable_balance=withdrawable_balance.quantize(Decimal("0.01")),
+            this_month_revenue=this_month_revenue.quantize(Decimal("0.01")),
+            this_month_commission=this_month_commission.quantize(Decimal("0.01"))
         )
     
     @staticmethod
@@ -450,16 +450,18 @@ class AgentService:
         
         commission_list = []
         for commission, user in data:
-            # Handle potential None values for numeric operations
-            amt = commission.amount or Decimal("0")
+            amt = (commission.amount or Decimal("0")).quantize(Decimal("0.01"))
+            
+            # Estimate revenue (10x commission)
+            rev = (amt * Decimal("10")).quantize(Decimal("0.01"))
             
             commission_list.append(schemas.CommissionRecord(
                 id=commission.id,
-                user_id=commission.user_id or uuid.uuid4(), # Fallback UUID if missing
-                user_name=user.full_name if user else "Unknown User",
+                user_id=commission.user_id or uuid.uuid4(),
+                user_name=user.full_name if user else "Simulation Actor",
                 amount=amt,
-                revenue_generated=amt * Decimal("10"),  # Estimate
-                commission_rate=Decimal("10"),  # Default 10%
+                revenue_generated=rev,
+                commission_rate=Decimal("10.00"),
                 date=commission.created_at,
                 status=commission.status or "PAID"
             ))
@@ -467,7 +469,7 @@ class AgentService:
         return schemas.CommissionsList(
             commissions=commission_list,
             total=total,
-            total_amount=total_amount
+            total_amount=total_amount.quantize(Decimal("0.01"))
         )
     
     @staticmethod
@@ -726,10 +728,12 @@ class AgentService:
             await db.flush()
 
         for i, player_name in enumerate(mock_players):
+            # Quantize for clean database storage
+            chunk_val = Decimal(str(chunk_amt)).quantize(Decimal("0.01"))
             commission = Commission(
                 agent_id=agent_id,
-                user_id=dummy_user.id, # Link to our simulation actor
-                amount=chunk_amt,
+                user_id=dummy_user.id,
+                amount=chunk_val,
                 type="REVENUE_SHARE",
                 status="PAID",
                 created_at=datetime.utcnow() - timedelta(hours=(i+1)*2),

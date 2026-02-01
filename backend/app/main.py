@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     from app.modules.auth.models import User
     from app.modules.wallet.models import Wallet, Transaction
     from app.modules.agent.models import Commission
-    from app.modules.affiliate.models import AffiliateLink, ClickEvent
+    from app.modules.affiliate.models import AffiliateLink, ClickEvent, Conversion, AffiliatePayout
     
     yield
 
