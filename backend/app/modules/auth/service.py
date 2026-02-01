@@ -85,3 +85,27 @@ class AuthService:
         # Successful login - reset failed attempts if applicable
         logger.info(f"Successful login for user: {email}")
         return user
+    
+    @staticmethod
+    async def change_password(db: AsyncSession, user_id: str, current_password: str, new_password: str) -> User:
+        """Change user password"""
+        # Get user
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalars().first()
+        
+        if not user:
+             raise InvalidCredentialsError() # Reuse this or 404
+        
+        # Verify current password
+        if not verify_password(current_password, user.hashed_password):
+            logger.warning(f"Failed password change attempt for user: {user.email}")
+            raise InvalidCredentialsError()
+        
+        # Update password
+        user.hashed_password = get_password_hash(new_password)
+        
+        await db.commit()
+        await db.refresh(user)
+        
+        logger.info(f"Password changed successfully for user: {user.email}")
+        return user

@@ -115,3 +115,16 @@ class UpdateProfileRequest(BaseModel):
     class Config:
         # Don't allow empty strings
         str_strip_whitespace = True
+
+class ChangePasswordRequest(BaseModel):
+    """Request to change password"""
+    current_password: str = Field(..., max_length=128, description="Current password for verification")
+    new_password: str = Field(..., min_length=8, max_length=128, description="New secure password")
+    
+    @field_validator('new_password')
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Validate password meets minimum security requirements"""
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        return v

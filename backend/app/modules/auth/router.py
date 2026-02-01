@@ -10,7 +10,8 @@ from app.modules.auth.schemas import (
     TokenResponse,
     ErrorResponse,
     UpdateProfileRequest,
-    UserProfileResponse
+    UserProfileResponse,
+    ChangePasswordRequest
 )
 from app.modules.auth import schemas
 from app.modules.auth.models import User
@@ -26,6 +27,47 @@ import logging
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+@router.post(
+    "/change-password",
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {"description": "Password changed successfully"},
+        400: {"model": ErrorResponse, "description": "Invalid current password or new password strength parameters"},
+        401: {"model": ErrorResponse, "description": "Invalid or expired token"},
+    }
+)
+async def change_password(
+    password_data: ChangePasswordRequest,
+    current_user: User = Depends(dependencies.get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Change account password
+    
+    Requires current password for verification.
+    New password must meet minimum security requirements.
+    """
+    try:
+        await AuthService.change_password(
+            db, 
+            current_user.id, 
+            password_data.current_password, 
+            password_data.new_password
+        )
+        return {"message": "Password changed successfully"}
+        
+    except InvalidCredentialsError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password"
+        )
+    except Exception as e:
+        logger.error(f"Password change error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to change password"
+        )
 
 @router.post(
     "/register",
